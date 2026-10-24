@@ -17,14 +17,23 @@
             --color-6: #3B6B8A;
         }
 
-        body {
+        html, body {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            width: 100%;
+            height: 100vh; /* Ajusta la altura al marco de Genially */
+            overflow: hidden; /* Elimina la barra de scroll */
+            box-sizing: border-box;
+        }
+
+        body {
+            padding: 15px 20px;
             font-family: 'Roboto', sans-serif;
-            background-color: var(--color-5);
+            background-color: #c1ebe3; /* Nuevo color de fondo */
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center; /* Centra el contenido verticalmente */
         }
 
         h1, h2, h3, .title-font {
@@ -35,11 +44,12 @@
         .progress-container {
             width: 100%;
             max-width: 960px;
-            margin-bottom: 30px;
+            margin-bottom: 20px; /* Margen reducido para ahorrar espacio vertical */
             background-color: var(--color-1);
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
 
         .progress-bar {
@@ -59,7 +69,7 @@
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 300px));
-            gap: 25px;
+            gap: 20px; /* Gap reducido levemente para evitar desbordes */
             justify-content: center;
             width: 100%;
             max-width: 960px;
@@ -68,7 +78,7 @@
         .grid-item {
             width: 100%;
             max-width: 300px;
-            height: 200px;
+            height: min(200px, 32vh); /* Se adapta si el marco de Genially es muy bajo */
             border-radius: 15px;
             background-size: cover;
             background-position: center;
@@ -216,19 +226,19 @@
             margin: 0;
         }
         
-        /* Nuevo contenedor para el texto y el ícono lateral */
+        /* Contenedor para el texto y el ícono lateral */
         .modal-body-content {
             display: flex;
             align-items: flex-start;
             gap: 15px;
         }
 
-        /* TAMAÑO DEL ÍCONO AUMENTADO (De 28px a 45px) */
+        /* TAMAÑO DEL ÍCONO AUMENTADO */
         .modal-body-icon {
             font-size: 45px;
             color: var(--color-2);
             margin-top: 3px;
-            flex-shrink: 0; /* Evita que el ícono se encoja */
+            flex-shrink: 0; 
         }
 
         .modal-text {
@@ -269,54 +279,54 @@
             {
                 title: "Ejercicio de la actividad laboral",
                 icon: "fa-briefcase",
-                textIcon: "fa-gavel", /* Modificado a un mazo para representar el Sistema Penal colombiano */
+                textIcon: "fa-gavel", 
                 bg: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=400&h=300",
-                modalBg: "var(--color-5)", // Amarillo claro
+                modalBg: "var(--color-5)", 
                 text: "El ejercicio de la actividad laboral de todo profesional que se desempeñe en el marco de los derechos de la infancia y la adolescencia implica el conocimiento integral y la práctica reflexiva sobre su interpretación y aplicación y, dentro de la aplicación de la Ley 1098 de 2006, conocimiento del tratamiento que se le da a los niños, niñas y adolescentes en el Sistema Penal colombiano. El punto de partida implica reflexionar sobre el concepto de niño, niña y adolescente y su diferencia con el concepto que subyacía al derogado Código del Menor.",
                 highlight: false
             },
             {
                 title: "Reconocimiento de la construcción social",
                 icon: "fa-users",
-                textIcon: "fa-people-group", /* Modificado para representar la construcción social humana */
+                textIcon: "fa-people-group", 
                 bg: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=400&h=300",
-                modalBg: "var(--color-1)", // Rosa claro (Destacado)
+                modalBg: "var(--color-1)", 
                 text: "Reconozcamos la construcción social e histórica del concepto y comprendamos la diferencia entre la doctrina de la situación irregular y la doctrina de la protección integral como horizontes de aplicación e interpretación práctica.",
                 highlight: true
             },
             {
                 title: "Definición del concepto de niño o niña",
                 icon: "fa-child-reaching",
-                textIcon: "fa-brain", /* Modificado a un cerebro para ilustrar que la definición es compleja y un concepto construido */
+                textIcon: "fa-brain", 
                 bg: "https://images.unsplash.com/photo-1557672199-6e8c7b7b0f1a?auto=format&fit=crop&q=80&w=400&h=300",
-                modalBg: "var(--color-4)", // Verde amarillento
+                modalBg: "var(--color-4)", 
                 text: "Pues bien, partamos del hecho, según el cual, definir el concepto de niño o niña no deja de ser una situación compleja, históricamente la concepción que se ha tenido de los niños, las niñas y los adolescentes ha sido diversa dependiendo del concepto construido en un momento histórico dado y con base en él ha fluctuado el tratamiento legal o social de los niños y las niñas.",
                 highlight: false
             },
             {
                 title: "Noción socialmente construida",
                 icon: "fa-hands-holding-child",
-                textIcon: "fa-users-gear", /* Modificado para representar el complejo proceso de construcción social */
+                textIcon: "fa-users-gear", 
                 bg: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&q=80&w=400&h=300",
-                modalBg: "var(--color-5)", // Amarillo claro
+                modalBg: "var(--color-5)", 
                 text: "El concepto de niño y niña es una noción socialmente construida (Aries, 1987), razón por la cual no se puede considerar como una categoría ontológica, pues constituye el resultado de un complejo proceso de construcción social, cuyos orígenes se remontan al siglo XVII (García Méndez, 1998). Para Aries, en la Edad Media las sociedades no podían representarse a los niños y niñas, muchísimo menos pensarlos como sujetos sociales. Se era niño y niña mientras se mantuviera una dependencia física con la encargada de la crianza, luego se ingresaba al mundo adulto. En ese tiempo no había cabida para los niños y niñas; lo anterior, no implica un desprecio por ellos y ellas, sino una indistinción con la sociedad de los adultos.",
                 highlight: false
             },
             {
                 title: "Evolución de la niñez",
                 icon: "fa-chart-line",
-                textIcon: "fa-building-lock", /* Modificado para representar el "aislamiento" y la "institución cerrada" */
+                textIcon: "fa-building-lock", 
                 bg: "https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&q=80&w=400&h=300",
-                modalBg: "var(--color-4)", // Verde amarillento
+                modalBg: "var(--color-4)", 
                 text: "Posteriormente la niñez, toma la forma del “mimoseo”, es decir, en las familias más selectas se consideraba como la primera etapa donde los niños y las niñas no eran sujetos, sino que se constituían en un objeto para la recreación de los adultos, a través de sus actos graciosos de aprendizaje y socialización. A finales del siglo XVIII aparece la escuela como un medio de educación bajo el modelo del aislamiento; este aspecto refleja la cultura del internamiento, según la cual, para cada problema social se utilizaba una institución cerrada que modificara el comportamiento del niño y lo adecuara a los estándares sociales de comportamientos válidos y aceptados socialmente, en cuyo contexto se buscaba adecuar o moldear la subjetividad del niño o la niña a los comportamientos aceptados.",
                 highlight: false
             },
             {
                 title: "Siglo xix y xx",
                 icon: "fa-book-open",
-                textIcon: "fa-shield-halved", /* Modificado a un escudo para representar "objeto de protección de políticas" */
+                textIcon: "fa-shield-halved", 
                 bg: "https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=400&h=300",
-                modalBg: "var(--color-5)", // Amarillo claro
+                modalBg: "var(--color-5)", 
                 text: "En el siglo XIX y hasta mediados del XX, el concepto de niño se relacionó con la noción de menor, estableciendo una dicotomía entre estas dos nociones: por niños y niñas se entendió todo aquel que contaba con las condiciones básicas de desarrollo (familia, escuela y salud), y por menor aquel que no gozaba de ellas y por ende se encontraba en una “situación irregular” y era potencialmente un delincuente; en ese sentido, el menor se convertía en “objeto” de cuidado, objeto de protección de las políticas legislativas.",
                 highlight: false
             }
@@ -346,15 +356,12 @@
             const topic = topics[index];
             const modalBox = document.getElementById('modalBox');
             
-            // Asignar textos e íconos principales
             document.getElementById('modalTitle').innerText = topic.title;
             document.getElementById('modalIcon').className = `fa-solid ${topic.icon}`;
             document.getElementById('modalText').innerText = topic.text;
             
-            // Asignar el nuevo ícono lateral al texto
             document.getElementById('modalTextIcon').className = `fa-solid ${topic.textIcon} modal-body-icon`;
             
-            // Aplicar colores de fondo del modal basados en la paleta
             modalBox.style.backgroundColor = topic.modalBg;
             
             if(topic.highlight) {

@@ -1,1 +1,592 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA - Lección 1, Parte 3</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Roboto:wght@400;500&display=swap');
 
+        :root {
+            --color-1: #F0D0CE;
+            --color-2: #BA5239;
+            --color-3: rgba(70, 99, 96, 1.00); /* #466360 */
+            --color-4: #CED82D;
+            --color-5: #F3F4BC;
+            --color-6: #3B6B8A;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Bloqueo de scroll general para embeber */
+        html, body {
+            width: 100%;
+            height: 100vh;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden; 
+            background-color: #000;
+        }
+
+        h1, h2, h3, .title-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* --- CONTENEDOR 360 GRADOS --- */
+        .panorama-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1506744626753-1fa44a3000b9?q=80&w=2000&auto=format&fit=crop');
+            background-size: auto 100%;
+            background-repeat: repeat-x;
+            background-position: 0% 50%;
+            animation: pan360 40s linear infinite alternate;
+        }
+
+        @keyframes pan360 {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3);
+        }
+
+        /* --- HOTSPOTS DISTRIBUCIÓN --- */
+        .hotspots-wrapper {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+            padding: 0 5%;
+        }
+
+        .hotspot-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hotspot-btn {
+            background: rgba(255, 255, 255, 0.95);
+            border: 4px solid var(--color-3);
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s, border-color 0.3s;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hotspot-btn:hover {
+            transform: scale(1.15) translateY(-5px);
+            background: var(--color-5);
+            border-color: var(--color-2);
+        }
+
+        .hotspot-btn i.main-icon {
+            font-size: 32px;
+            color: var(--color-3);
+            transition: color 0.3s;
+        }
+
+        .hotspot-btn:hover i.main-icon {
+            color: var(--color-2);
+        }
+
+        .hotspot-letter {
+            position: absolute;
+            bottom: -30px;
+            background: var(--color-3);
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 18px;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        /* --- ICONO VISTO (CHECK VERDE) --- */
+        .viewed-check {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: white;
+            color: #4CAF50;
+            border-radius: 50%;
+            font-size: 20px;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            z-index: 20;
+        }
+
+        /* --- ANIMACIÓN TENUE PARA HOTSPOT C --- */
+        .anim-pulse {
+            animation: pulseHotspot 2s infinite;
+            border-color: var(--color-4);
+        }
+
+        @keyframes pulseHotspot {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(206, 216, 45, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(206, 216, 45, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(206, 216, 45, 0); }
+        }
+        
+        .anim-pulse:hover {
+            animation: none;
+        }
+
+        /* --- MODAL / POP UP --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(59, 107, 138, 0.85); 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: #f7f9f9;
+            padding: 35px;
+            border-radius: 15px;
+            max-width: 850px;
+            width: 90%;
+            max-height: 85vh; 
+            overflow-y: auto;
+            position: relative;
+            transform: translateY(30px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+            border-left: 12px solid var(--color-3);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--color-3);
+            border: none;
+            background: none;
+            transition: transform 0.2s, color 0.2s;
+            z-index: 100;
+        }
+        
+        .close-btn:hover {
+            transform: rotate(90deg);
+            color: var(--color-2);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .modal-header i.header-icon {
+            font-size: 35px;
+            color: var(--color-3); 
+            margin-right: 15px;
+        }
+
+        .modal-title-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            color: var(--color-6);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .letter-badge {
+            background-color: var(--color-2);
+            color: white;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            font-weight: 800;
+            font-size: 18px;
+        }
+
+        .modal-subtitle {
+            font-size: 14px;
+            color: var(--color-2);
+            margin: 5px 0 0 0;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- DISEÑO INFOGRAFÍA (Línea de tiempo con nodos circulares) --- */
+        .infographic-container {
+            position: relative;
+            padding: 20px 0 20px 25px;
+        }
+
+        .infographic-container::before {
+            content: '';
+            position: absolute;
+            top: 20px; 
+            bottom: 20px; 
+            left: 42px; /* Posición de la línea conectora */
+            width: 4px;
+            background-color: var(--color-1);
+            border-radius: 2px;
+            z-index: 1;
+        }
+
+        .info-node {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            z-index: 2;
+        }
+
+        .info-circle {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            background-color: var(--color-3);
+            border: 4px solid white;
+            border-radius: 50%; /* FORMA CIRCULAR solicitada */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            margin-right: 20px;
+            z-index: 3;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+
+        .info-content {
+            background: white;
+            border: 2px solid var(--color-1);
+            border-radius: 0 25px 25px 25px; /* Bordes muy redondeados / jerárquicos */
+            padding: 18px 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            width: 100%;
+            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .info-node:hover .info-content {
+            transform: translateX(5px);
+            border-color: var(--color-2);
+            box-shadow: 0 8px 20px rgba(186, 82, 57, 0.15);
+        }
+
+        .info-node:hover .info-circle {
+            transform: scale(1.1);
+            background-color: var(--color-2);
+        }
+
+        /* --- PESTAÑA DESPLEGABLE (HOTSPOT B) --- */
+        details.info-tab {
+            background: white;
+            border-radius: 15px;
+            border: 2px solid var(--color-2);
+            margin-top: 25px;
+            margin-left: 25px;
+            overflow: hidden;
+            animation: tabGlow 3s infinite alternate;
+        }
+
+        @keyframes tabGlow {
+            0% { box-shadow: 0 0 5px rgba(186, 82, 57, 0.2); }
+            100% { box-shadow: 0 0 15px rgba(186, 82, 57, 0.6); }
+        }
+
+        details.info-tab summary {
+            background: var(--color-2);
+            color: white;
+            padding: 15px 20px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            outline: none;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        details.info-tab summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details.info-tab summary::after {
+            content: '\f078'; 
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            transition: transform 0.3s;
+        }
+
+        details.info-tab[open] summary::after {
+            transform: rotate(180deg);
+        }
+
+        .tab-content {
+            padding: 5px 20px 20px 0;
+            background: rgba(255,255,255,0.9);
+        }
+
+        /* Scrollbar personalizado modal */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--color-3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--color-6); }
+
+        @media (max-width: 768px) {
+            .hotspots-wrapper { flex-wrap: wrap; padding: 20px; }
+            .hotspot-item { margin: 15px; }
+            .hotspot-btn { width: 60px; height: 60px; }
+            .modal-content { padding: 20px; }
+            .infographic-container::before { left: 32px; }
+            .info-circle { width: 30px; height: 30px; min-width: 30px; font-size: 12px; margin-right: 15px; }
+            .infographic-container { padding-left: 15px; }
+            details.info-tab { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="panorama-container">
+        <div class="overlay"></div>
+        <div class="hotspots-wrapper" id="hotspotsContainer">
+            <!-- Los Hotspots se inyectan con Javascript -->
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="modal-header">
+                <i id="modalIcon" class="fa-solid fa-circle-info header-icon"></i>
+                <div class="modal-title-wrapper">
+                    <h2 class="modal-title title-font">
+                        <span class="letter-badge" id="modalLetter">A</span>
+                        <span id="modalTitleText">Título Principal</span>
+                    </h2>
+                    <div class="modal-subtitle title-font" id="modalSubtitle">Subtítulo de la sección</div>
+                </div>
+            </div>
+            
+            <div class="modal-body" id="modalText">
+                <!-- Contenido inyectado -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Datos fragmentados lógicamente de forma idéntica al texto original
+        const contentData = [
+            {
+                id: 'A',
+                letter: 'A',
+                icon: 'fa-scale-balanced',
+                title: 'Percepción sobre la infancia',
+                subtitle: 'Distinción entre situación irregular y protección integral',
+                anim: false,
+                nodes: [
+                    "La distinción planteada, entre situación irregular y protección integral, no es una simple distinción teórica o conceptual sin alcance práctico.",
+                    "Esta distinción ha sido muy importante en el desarrollo histórico de la protección de los derechos de los niños, las niñas y los adolescentes,",
+                    "en este sentido García Méndez plantea que la Convención sobre los Derechos del Niño impuso un cambio en la percepción sobre la infancia que va más allá de los límites del derecho,",
+                    "en la medida que impuso la instauración de una nueva cultura de respeto a los Derechos Humanos de los niños, las niñas y los adolescentes sin distinción alguna,",
+                    "reconociéndolos como auténticos sujetos de derechos que gozan de todos los Derechos Humanos de los adultos, además de una serie de derechos especiales que les corresponde como personas en crecimiento y desarrollo."
+                ]
+            },
+            {
+                id: 'B',
+                letter: 'B',
+                icon: 'fa-gavel',
+                title: 'Superación de la situación irregular',
+                subtitle: 'Avanzando hacia la protección integral',
+                anim: false,
+                nodes: [
+                    "Para el autor citado, este cambio superó la concepción que se tenía y que se denominaba “la situación irregular” y se avanzó hacía una concepción de la “protección integral”.",
+                    "La primera (situación irregular), tenía como características la preponderancia de la acción judicial sobre los “menores” en situación irregular, es decir, aquellos menores desprovistos de condiciones básicas y delincuentes en potencia;",
+                    "no tenía en cuenta las deficiencias de las políticas sociales, y daba más importancia a las soluciones individuales de tipo represivo o administrativo cuyo resultado común era la adopción o el encerramiento en instituciones,",
+                    "la adopción de medidas discrecionales sin políticas sociales definidas, el tratamiento diferenciado a los menores que cometían actos penalmente relevantes con relación a los niños de familias de sectores sociales privilegiados",
+                    "y, en el mejor de los casos, el menor era objeto de protección, objeto de compasión/represión, objeto del derecho (Escalante Barreto, 2018), en este sentido, el menor al ser objeto de algo o de alguien era cosificado y tratado como tal."
+                ],
+                tab: {
+                    title: "Doctrina crítica",
+                    nodes: [
+                        "Respecto al concepto de menor y la orientación filosófica del anterior código del menor en Colombia, la doctrina especializada fue crítica de su contenido a pesar de ser posterior a importantes instrumentos internacionales en la materia,",
+                        "en este sentido compartimos la tesis que plantea García (1999; 75-76), según la cual, el código del menor de 1989, a pesar de ser posterior a la Convención y haberse declarado inspirado en ella,",
+                        "en su interior y en la práctica o puesta en acción reproducía los vicios de las viejas legislaciones de menores, por lo que se le acusaba de ser sólo una adecuación formal a los principios de la Convención,",
+                        "representando una “versión elaborada y refinada de la obsoleta doctrina de la “situación irregular”.",
+                        "Es por esta razón, por la que se insiste en la necesidad de leer e interpretar la Ley de Infancia y Adolescencia desde una perspectiva constitucional y no desde la antigua óptica del código anterior, sino con nuevos referentes constitucionales y especialmente desde el reconocimiento de los niños, niñas y adolescentes como ciudadanos activos- sujetos de derechos."
+                    ]
+                }
+            },
+            {
+                id: 'C',
+                letter: 'C',
+                icon: 'fa-shield-halved',
+                title: 'Última Ratio',
+                subtitle: 'Límites en el ámbito penal y administrativo',
+                anim: true,
+                nodes: [
+                    "Si en materia penal se habla de la necesidad de que la acción punitiva del Estado sea la última ratio,",
+                    "en materia de infancia y adolescencia esa última ratio está reforzada bajo el entendido de que toda restricción de derechos y limitación de garantías debe hacerse en el marco del proceso penal con todas las garantías y no en el ámbito administrativo."
+                ]
+            },
+            {
+                id: 'D',
+                letter: 'D',
+                icon: 'fa-children',
+                title: 'Derechos fundamentales prevalentes',
+                subtitle: 'Igualdad, políticas públicas y corresponsabilidad',
+                anim: false,
+                nodes: [
+                    "La doctrina de la protección integral está orientada al reconocimiento de la infancia y adolescencia en igualdad de condiciones; esto es, los niños, niñas y adolescentes como sujetos plenos de derecho, de derechos fundamentales prevalentes.",
+                    "En esta concepción constitucionalmente orientada, no se hacen distinciones entre niñez y menores, se busca la articulación de políticas públicas para mejorar las condiciones de vida de la infancia y la adolescencia en igualdad de condiciones y se busca la corresponsabilidad en el restablecimiento de sus derechos en caso de ser vulnerados.",
+                    "Dicho contexto de diferenciación orienta el marco conceptual para la lectura, aplicación e interpretación que debemos dar a la ley de infancia y adolescencia,",
+                    "el tratamiento de los niños, las niñas y los adolescentes como sujetos de derechos implica, como se verá, el reconocimiento como sujetos que construyen su realidad social y que deben por tanto participar en las decisiones que sobre la misma se deban adoptar, no solo a nivel familiar, sino social y de políticas públicas que versen en el ámbito de sus derechos."
+                ]
+            },
+            {
+                id: 'E',
+                letter: 'E', 
+                icon: 'fa-book-open-reader',
+                title: 'Nuevos modelos de interpretación',
+                subtitle: 'Superando la concepción de objeto del derecho',
+                anim: false,
+                nodes: [
+                    "A pesar del avance de tipo normativo que implica la ley en comento, es necesario adoptar nuevos modelos de interpretación que materialicen y realicen en la práctica las condiciones anunciadas,",
+                    "que den en la cotidianeidad el sentido al concepto de niños y niñas, que supere la vieja concepción del menor como objeto del derecho o de la sociedad."
+                ]
+            }
+        ];
+
+        function renderHotspots() {
+            const container = document.getElementById('hotspotsContainer');
+            container.innerHTML = '';
+
+            contentData.forEach((item, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'hotspot-item';
+
+                let btnClasses = 'hotspot-btn';
+                if (item.anim) btnClasses += ' anim-pulse';
+
+                wrapper.innerHTML = `
+                    <div class="${btnClasses}" onclick="openModal(${index})">
+                        <i class="fa-solid fa-circle-check viewed-check" id="check-${index}"></i>
+                        <i class="fa-solid ${item.icon} main-icon"></i>
+                    </div>
+                    <div class="hotspot-letter">${item.letter}</div>
+                `;
+                container.appendChild(wrapper);
+            });
+        }
+
+        // Genera el HTML tipo infografía (línea de tiempo con formas circulares jerárquicas)
+        function generateInfographic(nodesArray) {
+            let html = '<div class="infographic-container">';
+            nodesArray.forEach((node, idx) => {
+                html += `
+                    <div class="info-node">
+                        <div class="info-circle">${idx + 1}</div>
+                        <div class="info-content">${node}</div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            return html;
+        }
+
+        function openModal(index) {
+            const data = contentData[index];
+            
+            document.getElementById('modalLetter').innerText = data.letter;
+            document.getElementById('modalTitleText').innerText = data.title;
+            document.getElementById('modalSubtitle').innerText = data.subtitle;
+            document.getElementById('modalIcon').className = `fa-solid ${data.icon} header-icon`;
+            
+            // Construir el cuerpo con la infografía
+            let bodyContent = generateInfographic(data.nodes);
+
+            // Agregar la pestaña si existe, usando la misma estructura infográfica
+            if(data.tab) {
+                bodyContent += `
+                    <details class="info-tab">
+                        <summary>${data.tab.title}</summary>
+                        <div class="tab-content">
+                            ${generateInfographic(data.tab.nodes)}
+                        </div>
+                    </details>
+                `;
+            }
+
+            document.getElementById('modalText').innerHTML = bodyContent;
+            document.getElementById('modalOverlay').classList.add('active');
+            document.getElementById(`check-${index}`).style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        window.onload = renderHotspots;
+    </script>
+</body>
+</html>

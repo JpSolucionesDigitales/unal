@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objeto Virtual de Aprendizaje - Lección 1, Parte 2</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Roboto:wght@400;500&display=swap');
+
+        :root {
+            --color-1: #F0D0CE;
+            --color-2: #BA5239;
+            --color-3: rgba(70, 99, 96, 1.00); /* #466360 */
+            --color-4: #CED82D;
+            --color-5: #F3F4BC;
+            --color-6: #3B6B8A;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+            background-color: var(--color-1);
+        }
+
+        h1, h2, h3, .title-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* --- CONTENEDOR PRINCIPAL Y ESCENAS --- */
+        .app-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 70px); /* Deja espacio para navegación */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 20px;
+            overflow-y: auto;
+        }
+
+        .scene.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* --- FONDOS ANIMADOS CSS ESTILO SILUETA --- */
+        
+        /* Escena 1: Niños conversando, caminando, jugando */
+        #sceneA {
+            background-color: var(--color-1);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 150' opacity='0.08' fill='%23466360'%3E%3C!-- Conversando --%3E%3Ccircle cx='50' cy='50' r='12'/%3E%3Cpath d='M35,130 L45,80 L30,70 M45,80 L60,80 L65,130 L55,130 L50,100 L45,130 Z'/%3E%3Ccircle cx='90' cy='55' r='10'/%3E%3Cpath d='M80,130 L85,85 L70,85 M85,85 L95,85 L100,130 L90,130 L85,100 L80,130 Z'/%3E%3C!-- Caminando --%3E%3Ccircle cx='200' cy='45' r='12'/%3E%3Cpath d='M180,130 L195,85 L180,70 M195,85 L205,85 L210,115 L225,130 M205,85 L215,75 M190,130 L200,105 L180,130 Z'/%3E%3C!-- Jugando --%3E%3Ccircle cx='320' cy='50' r='11'/%3E%3Cpath d='M300,130 L315,80 L295,65 M315,80 L325,80 L330,130 L320,130 L315,100 L305,130 Z'/%3E%3Ccircle cx='350' cy='30' r='8' fill='%23BA5239'/%3E%3C/svg%3E");
+            background-size: 400px 150px;
+            background-position: 0% 95%;
+            background-repeat: repeat-x;
+            animation: moveSilhouettesA 20s linear infinite;
+        }
+
+        /* Escena 2: Gente hablando y protegiendo niños */
+        #sceneB {
+            background-color: var(--color-5);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 150' opacity='0.08' fill='%23466360'%3E%3C!-- Adulto protegiendo niño --%3E%3Ccircle cx='60' cy='35' r='14'/%3E%3Cpath d='M45,130 L55,75 L30,65 M55,75 L70,75 L80,130 L65,130 L60,100 L50,130 M55,75 L95,60'/%3E%3Ccircle cx='100' cy='70' r='10'/%3E%3Cpath d='M90,130 L95,95 L80,90 M95,95 L105,95 L115,130 L105,130 L100,110 L95,130 M95,95 L115,85'/%3E%3C!-- Escudo protector --%3E%3Cpath d='M20,20 Q100,-20 140,70' stroke='%23BA5239' stroke-width='4' fill='none' stroke-dasharray='6,6'/%3E%3C!-- Gente hablando --%3E%3Ccircle cx='280' cy='40' r='13'/%3E%3Cpath d='M265,130 L275,80 L260,70 M275,80 L285,80 L295,130 L280,130 L275,100 L270,130 M275,80 L300,75'/%3E%3Ccircle cx='330' cy='45' r='12'/%3E%3Cpath d='M315,130 L325,85 L305,85 M325,85 L335,85 L345,130 L335,130 L330,105 L320,130 M325,85 L340,90'/%3E%3C/svg%3E");
+            background-size: 400px 150px;
+            background-position: 0% 95%;
+            background-repeat: repeat-x;
+            animation: moveSilhouettesB 25s linear infinite;
+        }
+
+        @keyframes moveSilhouettesA {
+            0% { background-position: 0px 95%; }
+            100% { background-position: 400px 95%; }
+        }
+
+        @keyframes moveSilhouettesB {
+            0% { background-position: 400px 95%; }
+            100% { background-position: 0px 95%; }
+        }
+
+        /* ----------------------------------------------- */
+
+        .scene-title {
+            color: var(--color-3);
+            font-size: 28px;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+            background: rgba(255, 255, 255, 0.85);
+            padding: 10px 30px;
+            border-radius: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            z-index: 2;
+        }
+
+        /* --- HOTSPOTS (Infografía) --- */
+        .hotspots-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+            max-width: 1000px;
+            width: 100%;
+            margin: auto;
+            z-index: 2;
+        }
+
+        .hotspot {
+            background: white;
+            border: 3px solid var(--color-3);
+            border-radius: 15px;
+            width: 140px;
+            height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+            position: relative;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .hotspot:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-color: var(--color-2);
+        }
+
+        /* Animación sutil para los hotspot de párrafos destacados */
+        .hotspot.highlight-anim {
+            border-color: var(--color-4);
+            animation: pulseHighlight 2s infinite;
+        }
+
+        @keyframes pulseHighlight {
+            0% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+            50% { transform: scale(1.04); box-shadow: 0 8px 20px rgba(206, 216, 45, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        }
+
+        /* Desactiva la animación al hacer hover para que reaccione normalmente */
+        .hotspot.highlight-anim:hover {
+            animation: none;
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border-color: var(--color-2);
+        }
+
+        .hotspot i.icon-main {
+            font-size: 40px;
+            color: var(--color-3);
+            margin-bottom: 10px;
+            transition: color 0.3s;
+        }
+
+        .hotspot:hover i.icon-main {
+            color: var(--color-2);
+        }
+
+        .hotspot-label {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--color-6);
+            text-align: center;
+            padding: 0 10px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* --- ÍCONO DE RECURSO VISTO --- */
+        .viewed-icon {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            color: #4CAF50;
+            background: white;
+            border-radius: 50%;
+            font-size: 24px;
+            display: none;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* --- NAVEGACIÓN INFERIOR --- */
+        .nav-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background-color: var(--color-6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background-color: var(--color-3);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 22px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .nav-btn.active, .nav-btn:hover {
+            background-color: var(--color-4);
+            color: var(--color-6);
+            transform: scale(1.15);
+        }
+
+        /* --- MODAL / POP UP --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(59, 107, 138, 0.85); /* Color 6 con opacidad */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.8);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            border-top: 10px solid var(--color-3);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--color-3);
+            border: none;
+            background: none;
+            transition: transform 0.2s, color 0.2s;
+        }
+        
+        .close-btn:hover {
+            transform: rotate(90deg);
+            color: var(--color-2);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            padding-right: 30px;
+        }
+
+        .modal-header i {
+            font-size: 30px;
+            color: var(--color-3); 
+            margin-right: 15px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            color: var(--color-2);
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        .modal-subtitle {
+            font-size: 16px;
+            color: var(--color-6);
+            margin: 5px 0 20px 45px;
+            font-style: italic;
+            font-weight: 500;
+        }
+        
+        .modal-body {
+            color: #333;
+            font-size: 16px;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        /* ESTILO CSS SOLICITADO PARA RESALTAR PÁRRAFOS */
+        .highlight-text {
+            background-color: var(--color-5);
+            border-left: 6px solid var(--color-2);
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            font-weight: 500;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            color: var(--color-6);
+        }
+
+        /* Estilo general para los párrafos dentro del modal */
+        .modal-body p {
+            margin: 0;
+        }
+
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-3); 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-6); 
+        }
+
+        @media (max-width: 600px) {
+            .hotspot { width: 120px; height: 120px; }
+            .hotspot i.icon-main { font-size: 30px; }
+            .scene-title { font-size: 22px; }
+            .modal-content { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- ESCENA 1 -->
+        <section id="sceneA" class="scene active">
+            <div class="hotspots-container" id="hotspotsA">
+                <!-- Se inyecta con JS -->
+            </div>
+        </section>
+
+        <!-- ESCENA 2 -->
+        <section id="sceneB" class="scene">
+            <div class="hotspots-container" id="hotspotsB">
+                <!-- Se inyecta con JS -->
+            </div>
+        </section>
+
+        <!-- BARRA DE NAVEGACIÓN -->
+        <nav class="nav-bar">
+            <button class="nav-btn active" id="btnA" onclick="switchScene('A')">A</button>
+            <button class="nav-btn" id="btnB" onclick="switchScene('B')">B</button>
+        </nav>
+
+        <!-- MODAL -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal-content">
+                <button class="close-btn" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+                <div class="modal-header">
+                    <i id="modalIcon" class="fa-solid fa-circle-info"></i>
+                    <h2 class="modal-title title-font" id="modalTitle">Título</h2>
+                </div>
+                <div class="modal-subtitle" id="modalSubtitle">Subtítulo</div>
+                <div class="modal-body" id="modalText">
+                    <!-- Contenido -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const sceneA_Data = [
+            {
+                title: "Institucionalización",
+                subtitle: "El menor como peligro social",
+                icon: "fa-building-shield",
+                text: "El concepto de menor se asocia al peligro que representa para la sociedad un menor de edad que está en situación irregular y por lo tanto debe ser institucionalizado como primera opción de protección.",
+                highlight: false
+            },
+            {
+                title: "Concepto Peyorativo",
+                subtitle: "De menor a niñez",
+                icon: "fa-comments",
+                text: "Antes de la Ley de Infancia y Adolescencia el concepto de menor se utilizaba como sinónimo de niños, niñas y adolescentes por parte de las autoridades, pero con una orientación peyorativa de quien no tenía condiciones “normales” de vida. En los desarrollos constitucionales actuales, todos estos conceptos hacen parte de la misma categoría de niñez hasta los 18 años y se prefiere no usar el término de menor.",
+                highlight: true
+            },
+            {
+                title: "Ley Agote",
+                subtitle: "Legislación en Argentina",
+                icon: "fa-gavel",
+                text: "A manera de ejemplo, en Argentina se promulgó la Ley Agote, oficialmente Ley Nacional 10.903 o Ley de Patronato de menores, sancionada en 1919 e impulsada por el médico y político Luis Agote, esta es considerada la primera legislación específica sobre la minoridad en América Latina, su objetivo declarado era la protección y educación de los niños en situación de vulnerabilidad, pero en la práctica consolidó un modelo de control estatal sobre la infancia pobre.",
+                highlight: false
+            },
+            {
+                title: "Sujetos de Derechos",
+                subtitle: "Superación del tratamiento objeto",
+                icon: "fa-child",
+                text: "Estas concepciones de menor perduraron por largo tiempo, y con base en ellas germinó y se desarrolló la doctrina de la “situación irregular”, hasta que se proclama la concepción de los niños y las niñas como sujetos de derechos. La superación del niño como objeto de tratamiento es resultado de un largo proceso que parte de la Declaración Universal de los Derechos Humanos de 1948 que considera a todos los seres humanos – sin excluir a los niños y las niñas- como personas; continúa con la Declaración de los Derechos del Niño de 1958 y tiene su punto de no retorno en la Convención Internacional de los Derechos del Niño en 1989, en donde se les declara sujetos de plenos de derechos (García Méndez, 1998)",
+                highlight: false
+            },
+            {
+                title: "Adopción de la Convención",
+                subtitle: "Hitos internacionales y Colombia",
+                icon: "fa-globe",
+                text: "La Convención Internacional de los Derechos del Niño en 1989 fue adoptada por la Asamblea General de las Naciones Unidas en resolución No. 4425 del 20 de noviembre de 1989 la cual entró en vigor el 2 de septiembre de 1990. Para Colombia su vigencia es a partir del 28 de enero de 1991 en virtud de la Ley 12 del mismo año.",
+                highlight: true
+            },
+            {
+                title: "Concepto de Niño",
+                subtitle: "Definición normativa actual",
+                icon: "fa-book-open",
+                text: "Como categoría normativa, el concepto de niño ha sido muy polémico; en la actualidad no existe duda de lo que se entiende por niños, conforme a la Convención Internacional de los Derechos del Niño de 1989, cuando en su artículo primero expresa “…se entiende por niño todo ser humano menor de dieciocho años de edad, salvo que, en virtud de la Ley que le sea aplicable, haya alcanzado antes la mayoría de edad”.",
+                highlight: false
+            },
+            {
+                title: "Criterio Cuantitativo",
+                subtitle: "Tránsito a la adultez y derechos",
+                icon: "fa-scale-balanced",
+                text: "Es importante destacar que la Convención establece este criterio cuantitativo, para definir al niño por dos aspectos importantes: primero porque comprende el tránsito de la niñez a la etapa adulta como un proceso en el cual no hay una ruptura fácilmente delimitable y de aplicación universal. Segundo, porque desde una interpretación adecuada de ella, fácilmente se concluye que desde el punto de vista cualitativo, los niños son personas y como tales son titulares como mínimo de los mismos derechos de los adultos, solo que ejercen esos derechos conforme al ciclo vital en el que se encuentran y son de rango privilegiado. Los niños y las niñas gozan de una súper protección o protección complementaria de sus derechos, que no es autónoma sino fundada en la protección jurídica general (Cillero Bruñol, 2001).",
+                highlight: false
+            },
+            {
+                title: "Constitución Colombiana",
+                subtitle: "Ley 1098 de 2006",
+                icon: "fa-landmark-flag",
+                text: "La Constitución colombiana coincide con la Convención, al declarar la mayoría de edad a los 18 años; en este sentido, el artículo 3 del Código de la Infancia y Adolescencia (Ley 1098 de 2006) establece que, “Para todos los efectos de esta ley son sujetos titulares de derechos todas las personas menores de 18 años. Sin perjuicio de lo establecido en el artículo 34 del Código Civil, se entiende por niño o niña las personas entre los 0 y los 12 años, y por adolescente las personas entre 12 y 18 años de edad”.",
+                highlight: true
+            }
+        ];
+
+        const sceneB_Data = [
+            {
+                title: "Ciudadanía y Participación",
+                subtitle: "Niñez y adolescencia en la comunidad",
+                icon: "fa-users-viewfinder",
+                text: "Dentro del concepto de sujetos de derechos prevalentes, los niños y las niñas son incluidos en la ciudadanía, con participación en la comunidad estatal y en los otros entes políticos territoriales, de ahí que el artículo 45 de la Constitución consagre el derecho de los adolescentes a la participación en organismos públicos encargados de adoptar y desarrollar políticas públicas de orden social, económico, educativo y familiar relacionadas con la juventud. En esta misma línea, la adolescencia es parte del concepto de niñez, en tanto el rango de edad incluye este periodo de desarrollo psicológico y social, puede identificarse como aquella etapa en que empiezan los cambios físicos de maduración sexual (12 años aproximadamente), y se prolonga hasta más allá de los 18 años de edad; sin embargo, para efectos legales el legislador ha previsto los 18 años para determinar la mayoría de edad.",
+                highlight: false
+            },
+            {
+                title: "Derechos Constitucionales",
+                subtitle: "Protección especial prevalente",
+                icon: "fa-shield-halved",
+                text: "Desde el punto de vista de la Constitución, los niños, las niñas y los adolescentes son sujetos de derechos constitucionales fundamentales, de protección especial prevalente, de protección reforzada y sujetos de restablecimiento de derechos.",
+                highlight: false
+            },
+            {
+                title: "Denominación Indistinta",
+                subtitle: "Igualdad de tratamiento",
+                icon: "fa-equals",
+                text: "En la Carta Política, se les ha denominado indistintamente como niños, adolescentes y menores, sin que normativamente se precise su significado y la diferencia que comporta cada una de estas voces, por lo que hoy se deben entender como sinónimos y de igual tratamiento constitucional.",
+                highlight: false
+            },
+            {
+                title: "Corte Constitucional",
+                subtitle: "Sinonimia normativa y autonomía",
+                icon: "fa-landmark-dome",
+                text: "La Corte Constitucional en la Sentencia C-170 de 2004, estableció que los conceptos de “adolescentes” y “niños” son sinónimos en Colombia, en cuanto no existe un contenido normativo que distinga dichas nociones y se asimiló la palabra “adolescentes”, a todos los niños que se encuentran en etapa de escolaridad, frente a los cuales es predicable un mayor grado de capacidad, autonomía y madurez, principalmente, para la participación activa en las decisiones que les conciernen. En la sentencia C-228 de 2008, estableció: “En relación con la protección constitucional a los adolescentes, la Corte ha considerado que ellos están comprendidos en el concepto de “niños” (…) y por tanto gozan de protección especial por parte de la familia, la sociedad y el Estado y son titulares de los derechos fundamentales en él consagrados, que prevalecen sobre los derechos de los demás. En este sentido ha señalado que la distinción constitucional entre niños y adolescentes no tiene como finalidad otorgar a estos últimos distinta protección, sino otorgarles participación en los organismos públicos y privados que adopten decisiones que les conciernen, teniendo en cuenta su mayor grado de desarrollo”.",
+                highlight: true
+            },
+            {
+                title: "Privilegios Fundamentales",
+                subtitle: "Protección a todo menor de 18",
+                icon: "fa-hands-holding-child",
+                text: "Si bien el concepto de adolescente ha sido de difícil definición (Sentencia: C-092, 2002), la Corte Constitucional ha indicado que la distinción entre niño y adolescente no está desarrollada para efectos de la prevalencia de sus derechos, sino de la participación, por lo que la protección especial otorgada a la niñez, también lo es para los adolescentes, al considerar que todo ser humano menor de 18 años es niño o niña. Así, la máxima intérprete de la Carta Fundamental expuso que “…los adolescentes (…) gozan de los mismos privilegios y derechos fundamentales que los niños y las niñas, (siempre y cuando no hayan cumplido los 18 años)\". En consecuencia, la protección constitucional estatuida en el artículo 44 de la Ley Fundamental a favor de los \"niños\" ha de entenderse referida a todo menor de dieciocho años.”.",
+                highlight: false
+            },
+            {
+                title: "Prevalencia de Derechos",
+                subtitle: "Sentencia C-092 de 2002",
+                icon: "fa-file-signature",
+                text: "La Corte Constitucional en la sentencia C-092 de 2002, desarrolla conceptualmente la importancia de los derechos prevalentes del niño, la niña y el adolescente, al punto que con base en esta prevalencia de derechos, la Corte modificó la interpretación del régimen de prelación de créditos en el caso de las acreencias por alimentos en favor de esta población de especial protección constitucional.",
+                highlight: true
+            }
+        ];
+
+        function renderHotspots(containerId, data) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = "";
+            data.forEach((item, index) => {
+                const hotspot = document.createElement("div");
+                hotspot.className = "hotspot";
+                
+                // Agregar clase de animación si el párrafo es destacado
+                if(item.highlight) {
+                    hotspot.classList.add("highlight-anim");
+                }
+
+                hotspot.onclick = () => openModal(item, index, containerId);
+                
+                hotspot.innerHTML = `
+                    <i class="fa-solid fa-circle-check viewed-icon" id="viewed-${containerId}-${index}"></i>
+                    <i class="fa-solid ${item.icon} icon-main"></i>
+                    <span class="hotspot-label">${item.title}</span>
+                `;
+                container.appendChild(hotspot);
+            });
+        }
+
+        function switchScene(sceneId) {
+            document.getElementById('sceneA').classList.remove('active');
+            document.getElementById('sceneB').classList.remove('active');
+            document.getElementById('btnA').classList.remove('active');
+            document.getElementById('btnB').classList.remove('active');
+
+            if(sceneId === 'A') {
+                document.getElementById('sceneA').classList.add('active');
+                document.getElementById('btnA').classList.add('active');
+            } else {
+                document.getElementById('sceneB').classList.add('active');
+                document.getElementById('btnB').classList.add('active');
+            }
+        }
+
+        function openModal(data, index, containerId) {
+            document.getElementById('modalTitle').innerText = data.title;
+            document.getElementById('modalSubtitle').innerText = data.subtitle;
+            document.getElementById('modalIcon').className = `fa-solid ${data.icon}`;
+            
+            const textContainer = document.getElementById('modalText');
+            
+            if(data.highlight) {
+                textContainer.innerHTML = `<p class="highlight-text">${data.text}</p>`;
+            } else {
+                textContainer.innerHTML = `<p>${data.text}</p>`;
+            }
+
+            document.getElementById('modalOverlay').classList.add('active');
+            
+            // Mostrar ícono de recurso visto
+            document.getElementById(`viewed-${containerId}-${index}`).style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        window.onload = () => {
+            renderHotspots('hotspotsA', sceneA_Data);
+            renderHotspots('hotspotsB', sceneB_Data);
+        };
+    </script>
+</body>
+</html>

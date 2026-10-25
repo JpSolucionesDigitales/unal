@@ -21,55 +21,30 @@
             margin: 0;
             padding: 0;
             width: 100%;
-            height: 100vh; /* Ajusta la altura al marco de Genially */
-            overflow: hidden; /* Elimina la barra de scroll */
+            height: 100vh;
+            overflow: hidden;
             box-sizing: border-box;
         }
 
         body {
             padding: 15px 20px;
             font-family: 'Roboto', sans-serif;
-            background-color: #c1ebe3; /* Nuevo color de fondo */
+            background-color: #c1ebe3;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center; /* Centra el contenido verticalmente */
+            justify-content: center;
         }
 
         h1, h2, h3, .title-font {
             font-family: 'Montserrat', sans-serif;
         }
 
-        /* Barra de progreso */
-        .progress-container {
-            width: 100%;
-            max-width: 960px;
-            margin-bottom: 20px; /* Margen reducido para ahorrar espacio vertical */
-            background-color: var(--color-1);
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            flex-shrink: 0;
-        }
-
-        .progress-bar {
-            height: 25px;
-            width: 0%;
-            background-color: var(--color-2);
-            transition: width 0.5s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
         /* Contenedor GRID */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 300px));
-            gap: 20px; /* Gap reducido levemente para evitar desbordes */
+            gap: 20px;
             justify-content: center;
             width: 100%;
             max-width: 960px;
@@ -78,7 +53,7 @@
         .grid-item {
             width: 100%;
             max-width: 300px;
-            height: min(200px, 32vh); /* Se adapta si el marco de Genially es muy bajo */
+            height: min(200px, 32vh);
             border-radius: 15px;
             background-size: cover;
             background-position: center;
@@ -97,7 +72,6 @@
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         }
 
-        /* Párrafo destacado (construcción social) */
         .grid-item.highlight {
             border: 4px solid var(--color-4);
         }
@@ -152,6 +126,20 @@
             transform: scale(1.05);
         }
 
+        /* Ícono de recurso visto */
+        .viewed-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #4CAF50;
+            background: white;
+            border-radius: 50%;
+            font-size: 24px;
+            display: none;
+            z-index: 10;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
         /* Modal / Pop-up */
         .modal-overlay {
             position: fixed;
@@ -179,6 +167,8 @@
             border-radius: 15px;
             max-width: 600px;
             width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
             position: relative;
             transform: translateY(-30px);
             transition: transform 0.3s ease, background-color 0.3s ease;
@@ -226,35 +216,58 @@
             margin: 0;
         }
         
-        /* Contenedor para el texto y el ícono lateral */
         .modal-body-content {
             display: flex;
-            align-items: flex-start;
+            flex-direction: column;
             gap: 15px;
         }
 
-        /* TAMAÑO DEL ÍCONO AUMENTADO */
-        .modal-body-icon {
-            font-size: 45px;
-            color: var(--color-2);
-            margin-top: 3px;
-            flex-shrink: 0; 
+        /* Estilos para pestañas desplegables */
+        details {
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.1);
+            margin-bottom: 10px;
         }
 
-        .modal-text {
-            line-height: 1.7;
+        summary {
+            padding: 12px 15px;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--color-6);
+            outline: none;
+            list-style: none;
+            position: relative;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        summary::before {
+            content: '\f0d7';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 15px;
+            transition: transform 0.3s;
+        }
+
+        details[open] summary::before {
+            transform: rotate(180deg);
+        }
+
+        .details-text {
+            padding: 0 15px 15px 15px;
+            line-height: 1.6;
             color: #222;
-            font-size: 16px;
+            font-size: 15px;
             text-align: justify;
             margin: 0;
         }
     </style>
 </head>
 <body>
-
-    <div class="progress-container">
-        <div class="progress-bar" id="progressBar">0%</div>
-    </div>
 
     <div class="grid-container" id="gridContainer">
         <!-- Contenido generado por Javascript -->
@@ -267,9 +280,8 @@
                 <i id="modalIcon" class="fa-solid fa-info-circle"></i>
                 <h2 class="modal-title title-font" id="modalTitle">Título</h2>
             </div>
-            <div class="modal-body-content">
-                <i id="modalTextIcon" class="fa-solid fa-star modal-body-icon"></i>
-                <p class="modal-text" id="modalText">Contenido...</p>
+            <div class="modal-body-content" id="modalTextContainer">
+                <!-- Pestañas generadas por Javascript -->
             </div>
         </div>
     </div>
@@ -279,60 +291,69 @@
             {
                 title: "Ejercicio de la actividad laboral",
                 icon: "fa-briefcase",
-                textIcon: "fa-gavel", 
                 bg: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=400&h=300",
                 modalBg: "var(--color-5)", 
-                text: "El ejercicio de la actividad laboral de todo profesional que se desempeñe en el marco de los derechos de la infancia y la adolescencia implica el conocimiento integral y la práctica reflexiva sobre su interpretación y aplicación y, dentro de la aplicación de la Ley 1098 de 2006, conocimiento del tratamiento que se le da a los niños, niñas y adolescentes en el Sistema Penal colombiano. El punto de partida implica reflexionar sobre el concepto de niño, niña y adolescente y su diferencia con el concepto que subyacía al derogado Código del Menor.",
+                tabs: [
+                    { label: "a. Ejercicio laboral y normatividad", text: "El ejercicio de la actividad laboral de todo profesional que se desempeñe en el marco de los derechos de la infancia y la adolescencia implica el conocimiento integral y la práctica reflexiva sobre su interpretación y aplicación y, dentro de la aplicación de la Ley 1098 de 2006, conocimiento del tratamiento que se le da a los niños, niñas y adolescentes en el Sistema Penal colombiano." },
+                    { label: "b. Punto de partida", text: "El punto de partida implica reflexionar sobre el concepto de niño, niña y adolescente y su diferencia con el concepto que subyacía al derogado Código del Menor." }
+                ],
                 highlight: false
             },
             {
                 title: "Reconocimiento de la construcción social",
                 icon: "fa-users",
-                textIcon: "fa-people-group", 
                 bg: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&q=80&w=400&h=300",
                 modalBg: "var(--color-1)", 
-                text: "Reconozcamos la construcción social e histórica del concepto y comprendamos la diferencia entre la doctrina de la situación irregular y la doctrina de la protección integral como horizontes de aplicación e interpretación práctica.",
+                tabs: [
+                    { label: "a. Construcción e interpretación", text: "Reconozcamos la construcción social e histórica del concepto y comprendamos la diferencia entre la doctrina de la situación irregular y la doctrina de la protección integral como horizontes de aplicación e interpretación práctica." }
+                ],
                 highlight: true
             },
             {
                 title: "Definición del concepto de niño o niña",
                 icon: "fa-child-reaching",
-                textIcon: "fa-brain", 
                 bg: "https://images.unsplash.com/photo-1557672199-6e8c7b7b0f1a?auto=format&fit=crop&q=80&w=400&h=300",
                 modalBg: "var(--color-4)", 
-                text: "Pues bien, partamos del hecho, según el cual, definir el concepto de niño o niña no deja de ser una situación compleja, históricamente la concepción que se ha tenido de los niños, las niñas y los adolescentes ha sido diversa dependiendo del concepto construido en un momento histórico dado y con base en él ha fluctuado el tratamiento legal o social de los niños y las niñas.",
+                tabs: [
+                    { label: "a. Complejidad del concepto", text: "Pues bien, partamos del hecho, según el cual, definir el concepto de niño o niña no deja de ser una situación compleja, históricamente la concepción que se ha tenido de los niños, las niñas y los adolescentes ha sido diversa dependiendo del concepto construido en un momento histórico dado y con base en él ha fluctuado el tratamiento legal o social de los niños y las niñas." }
+                ],
                 highlight: false
             },
             {
                 title: "Noción socialmente construida",
                 icon: "fa-hands-holding-child",
-                textIcon: "fa-users-gear", 
                 bg: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&q=80&w=400&h=300",
                 modalBg: "var(--color-5)", 
-                text: "El concepto de niño y niña es una noción socialmente construida (Aries, 1987), razón por la cual no se puede considerar como una categoría ontológica, pues constituye el resultado de un complejo proceso de construcción social, cuyos orígenes se remontan al siglo XVII (García Méndez, 1998). Para Aries, en la Edad Media las sociedades no podían representarse a los niños y niñas, muchísimo menos pensarlos como sujetos sociales. Se era niño y niña mientras se mantuviera una dependencia física con la encargada de la crianza, luego se ingresaba al mundo adulto. En ese tiempo no había cabida para los niños y niñas; lo anterior, no implica un desprecio por ellos y ellas, sino una indistinción con la sociedad de los adultos.",
+                tabs: [
+                    { label: "a. Noción socialmente construida", text: "El concepto de niño y niña es una noción socialmente construida (Aries, 1987), razón por la cual no se puede considerar como una categoría ontológica, pues constituye el resultado de un complejo proceso de construcción social, cuyos orígenes se remontan al siglo XVII (García Méndez, 1998)." },
+                    { label: "b. Perspectiva en la Edad Media", text: "Para Aries, en la Edad Media las sociedades no podían representarse a los niños y niñas, muchísimo menos pensarlos como sujetos sociales." },
+                    { label: "c. Dependencia y mundo adulto", text: "Se era niño y niña mientras se mantuviera una dependencia física con la encargada de la crianza, luego se ingresaba al mundo adulto." },
+                    { label: "d. Indistinción con los adultos", text: "En ese tiempo no había cabida para los niños y niñas; lo anterior, no implica un desprecio por ellos y ellas, sino una indistinción con la sociedad de los adultos." }
+                ],
                 highlight: false
             },
             {
                 title: "Evolución de la niñez",
                 icon: "fa-chart-line",
-                textIcon: "fa-building-lock", 
                 bg: "https://images.unsplash.com/photo-1557682250-33bd709cbe85?auto=format&fit=crop&q=80&w=400&h=300",
                 modalBg: "var(--color-4)", 
-                text: "Posteriormente la niñez, toma la forma del “mimoseo”, es decir, en las familias más selectas se consideraba como la primera etapa donde los niños y las niñas no eran sujetos, sino que se constituían en un objeto para la recreación de los adultos, a través de sus actos graciosos de aprendizaje y socialización. A finales del siglo XVIII aparece la escuela como un medio de educación bajo el modelo del aislamiento; este aspecto refleja la cultura del internamiento, según la cual, para cada problema social se utilizaba una institución cerrada que modificara el comportamiento del niño y lo adecuara a los estándares sociales de comportamientos válidos y aceptados socialmente, en cuyo contexto se buscaba adecuar o moldear la subjetividad del niño o la niña a los comportamientos aceptados.",
+                tabs: [
+                    { label: "a. La etapa del mimoseo", text: "Posteriormente la niñez, toma la forma del “mimoseo”, es decir, en las familias más selectas se consideraba como la primera etapa donde los niños y las niñas no eran sujetos, sino que se constituían en un objeto para la recreación de los adultos, a través de sus actos graciosos de aprendizaje y socialización." },
+                    { label: "b. La escuela y el internamiento", text: "A finales del siglo XVIII aparece la escuela como un medio de educación bajo el modelo del aislamiento; este aspecto refleja la cultura del internamiento, según la cual, para cada problema social se utilizaba una institución cerrada que modificara el comportamiento del niño y lo adecuara a los estándares sociales de comportamientos válidos y aceptados socialmente, en cuyo contexto se buscaba adecuar o moldear la subjetividad del niño o la niña a los comportamientos aceptados." }
+                ],
                 highlight: false
             },
             {
                 title: "Siglo xix y xx",
                 icon: "fa-book-open",
-                textIcon: "fa-shield-halved", 
                 bg: "https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=400&h=300",
                 modalBg: "var(--color-5)", 
-                text: "En el siglo XIX y hasta mediados del XX, el concepto de niño se relacionó con la noción de menor, estableciendo una dicotomía entre estas dos nociones: por niños y niñas se entendió todo aquel que contaba con las condiciones básicas de desarrollo (familia, escuela y salud), y por menor aquel que no gozaba de ellas y por ende se encontraba en una “situación irregular” y era potencialmente un delincuente; en ese sentido, el menor se convertía en “objeto” de cuidado, objeto de protección de las políticas legislativas.",
+                tabs: [
+                    { label: "a. Dicotomía niño vs. menor", text: "En el siglo XIX y hasta mediados del XX, el concepto de niño se relacionó con la noción de menor, estableciendo una dicotomía entre estas dos nociones: por niños y niñas se entendió todo aquel que contaba con las condiciones básicas de desarrollo (familia, escuela y salud), y por menor aquel que no gozaba de ellas y por ende se encontraba en una “situación irregular” y era potencialmente un delincuente; en ese sentido, el menor se convertía en “objeto” de cuidado, objeto de protección de las políticas legislativas." }
+                ],
                 highlight: false
             }
         ];
-
-        let viewedTopics = new Set();
 
         function renderGrids() {
             const container = document.getElementById('gridContainer');
@@ -342,6 +363,7 @@
                 gridItem.style.backgroundImage = `url('${topic.bg}')`; 
                 
                 gridItem.innerHTML = `
+                    <i class="fa-solid fa-circle-check viewed-icon" id="viewed-icon-${index}"></i>
                     <div class="grid-content">
                         <i class="fa-solid ${topic.icon} grid-icon"></i>
                         <h3 class="grid-title title-font">${topic.title}</h3>
@@ -355,38 +377,38 @@
         function openModal(index) {
             const topic = topics[index];
             const modalBox = document.getElementById('modalBox');
+            const modalTextContainer = document.getElementById('modalTextContainer');
             
             document.getElementById('modalTitle').innerText = topic.title;
             document.getElementById('modalIcon').className = `fa-solid ${topic.icon}`;
-            document.getElementById('modalText').innerText = topic.text;
             
-            document.getElementById('modalTextIcon').className = `fa-solid ${topic.textIcon} modal-body-icon`;
+            // Renderizar pestañas
+            modalTextContainer.innerHTML = '';
+            topic.tabs.forEach(tab => {
+                const details = document.createElement('details');
+                details.innerHTML = `
+                    <summary>${tab.label}</summary>
+                    <p class="details-text">${tab.text}</p>
+                `;
+                modalTextContainer.appendChild(details);
+            });
             
             modalBox.style.backgroundColor = topic.modalBg;
             
             if(topic.highlight) {
                 document.getElementById('modalTitle').style.color = 'var(--color-2)';
-                document.getElementById('modalTextIcon').style.color = 'var(--color-3)';
             } else {
                 document.getElementById('modalTitle').style.color = 'var(--color-6)';
-                document.getElementById('modalTextIcon').style.color = 'var(--color-2)';
             }
 
             document.getElementById('modalOverlay').classList.add('active');
             
-            viewedTopics.add(index);
-            updateProgress();
+            // Mostrar icono de visto
+            document.getElementById(`viewed-icon-${index}`).style.display = 'block';
         }
 
         function closeModal() {
             document.getElementById('modalOverlay').classList.remove('active');
-        }
-
-        function updateProgress() {
-            const progress = (viewedTopics.size / topics.length) * 100;
-            const progressBar = document.getElementById('progressBar');
-            progressBar.style.width = `${progress}%`;
-            progressBar.innerText = `Avance: ${Math.round(progress)}%`;
         }
 
         window.onload = renderGrids;

@@ -23,7 +23,6 @@
             padding: 0;
         }
 
-        /* Bloqueo de scroll general para el marco principal */
         html, body {
             width: 100%;
             height: 100vh;
@@ -36,7 +35,7 @@
             font-family: 'Montserrat', sans-serif;
         }
 
-        /* --- SLIDING PANELS (EXPANDING CARDS) --- */
+        /* --- SLIDING PANELS --- */
         .panels-container {
             display: flex;
             width: 100%;
@@ -59,7 +58,6 @@
             flex: 4;
         }
 
-        /* Overlay para oscurecer las imágenes y que resalte el texto */
         .panel-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -74,7 +72,7 @@
         }
 
         .panel:hover .panel-overlay {
-            background: rgba(59, 107, 138, 0.4); /* color 6 con transparencia */
+            background: rgba(59, 107, 138, 0.4); 
         }
 
         .panel-icon {
@@ -104,7 +102,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            pointer-events: none; /* Evitar clics hasta que expanda */
+            pointer-events: none; 
         }
 
         .panel:hover .panel-content {
@@ -163,22 +161,33 @@
         }
 
         .modal-content-box {
-            background: #ffffff;
-            padding: 40px;
             border-radius: 15px;
             max-width: 900px;
             width: 95%;
-            max-height: 85vh; /* Scroll interno si es necesario */
-            overflow-y: auto;
+            max-height: 85vh; 
             position: relative;
             transform: scale(0.9);
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             border-top: 10px solid var(--color-2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Oculta el scroll general de la caja */
         }
 
         .modal-overlay.active .modal-content-box {
             transform: scale(1);
+        }
+
+        /* Encabezado Fijo del Modal */
+        .modal-header-fixed {
+            padding: 30px 40px 20px 40px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            flex-shrink: 0;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+            z-index: 10;
         }
 
         .close-btn {
@@ -199,15 +208,7 @@
             color: var(--color-2);
         }
 
-        .modal-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 25px;
-            border-bottom: 2px solid var(--color-1);
-            padding-bottom: 15px;
-        }
-
-        .modal-header i.header-icon {
+        .modal-header-fixed i.header-icon {
             font-size: 35px;
             color: var(--color-3); 
             margin-right: 15px;
@@ -219,15 +220,19 @@
             margin: 0;
         }
 
-        .modal-body {
+        /* Cuerpo Scrolleable del Modal */
+        .modal-body-scroll {
+            padding: 30px 40px 40px 40px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .modal-body-scroll p {
+            margin-bottom: 18px;
             color: #222;
             font-size: 16px;
             line-height: 1.8;
             text-align: justify;
-        }
-
-        .modal-body p {
-            margin-bottom: 18px;
         }
 
         /* --- TARJETAS COMPARATIVAS (PANEL 1) --- */
@@ -243,16 +248,7 @@
             padding: 20px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.08);
             border-top: 5px solid var(--color-3);
-        }
-
-        .comp-card.irregular {
-            background-color: var(--color-1);
-            border-top-color: var(--color-2);
-        }
-
-        .comp-card.integral {
-            background-color: var(--color-5);
-            border-top-color: var(--color-4);
+            background: white;
         }
 
         .comp-title {
@@ -275,6 +271,7 @@
             margin-bottom: 12px;
             font-size: 14px;
             line-height: 1.5;
+            color: #333;
         }
 
         .comp-item strong {
@@ -285,51 +282,91 @@
 
         /* --- TEXTO RESALTADO CSS --- */
         .highlight-box {
-            background-color: var(--color-5);
+            background-color: white;
             border-left: 6px solid var(--color-4);
             padding: 20px;
             border-radius: 0 10px 10px 0;
             font-weight: 500;
             color: var(--color-3);
-            margin: 25px 0;
+            margin: 0 0 25px 0;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* --- ACORDEONES --- */
+        .accordion-item {
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-left: 5px solid var(--color-3);
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 18px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--color-6);
+            background: rgba(255, 255, 255, 0.9);
+            transition: background 0.3s;
+        }
+
+        .accordion-header:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .accordion-header i {
+            color: var(--color-2);
+            font-size: 20px;
+            transition: transform 0.3s ease, color 0.3s;
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            background: white;
+        }
+
+        .accordion-content-inner {
+            padding: 0 25px 25px 25px;
+        }
+
+        .accordion-item.active .accordion-header i {
+            color: var(--color-3);
         }
 
         /* Scrollbar modal */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: var(--color-3); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--color-6); }
 
-        /* Media Query para pantallas pequeñas (convierte los paneles horizontales en verticales) */
         @media (max-width: 768px) {
-            .panels-container {
-                flex-direction: column;
-            }
-            .panel-title {
-                font-size: 20px;
-                margin-bottom: 10px;
-            }
-            .panel-desc {
-                font-size: 14px;
-                margin-bottom: 15px;
-            }
-            .comparison-grid {
-                grid-template-columns: 1fr;
-            }
+            .panels-container { flex-direction: column; }
+            .panel-title { font-size: 20px; margin-bottom: 10px; }
+            .panel-desc { font-size: 14px; margin-bottom: 15px; }
+            .comparison-grid { grid-template-columns: 1fr; }
+            .modal-header-fixed { padding: 20px 25px 15px 25px; }
+            .modal-body-scroll { padding: 20px 25px 25px 25px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- CONTENEDOR PRINCIPAL: PANELES DESLIZANTES -->
     <div class="panels-container">
         
         <!-- PANEL 1 -->
-        <div class="panel" style="background-image: url('https://images.unsplash.com/photo-1589829085413-56de8ae18c73?q=80&w=1200&auto=format&fit=crop');">
+        <div class="panel" style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23F0D0CE'/%3E%3Cg fill='%23BA5239'%3E%3Ccircle cx='50' cy='40' r='18'/%3E%3Cpath d='M15 200 C 15 130, 40 90, 50 90 C 60 90, 85 130, 85 200 Z'/%3E%3C/g%3E%3Cg fill='%23466360'%3E%3Ccircle cx='140' cy='70' r='14'/%3E%3Cpath d='M115 200 C 115 150, 132 120, 140 120 C 148 120, 165 150, 165 200 Z'/%3E%3C/g%3E%3C/svg%3E&quot;); background-size: 150px 150px; background-repeat: repeat;">
             <div class="panel-overlay">
                 <i class="fa-solid fa-scale-unbalanced panel-icon"></i>
-                <h2 class="panel-title title-font">1. Paradigmas de Protección</h2>
+                <h2 class="panel-title title-font">Paradigmas de protección</h2>
                 <div class="panel-content">
                     <p class="panel-desc">Situación irregular vs. Protección integral en los derechos de la infancia.</p>
                     <button class="btn-cta" onclick="openModal('modal1')">
@@ -340,10 +377,10 @@
         </div>
 
         <!-- PANEL 2 -->
-        <div class="panel" style="background-image: url('https://images.unsplash.com/photo-1529156069898-49953eb1b5ae?q=80&w=1200&auto=format&fit=crop');">
+        <div class="panel" style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23F3F4BC'/%3E%3Cg fill='%233B6B8A'%3E%3Ccircle cx='60' cy='50' r='16'/%3E%3Cpath d='M25 200 C 25 140, 48 100, 60 100 C 72 100, 95 140, 95 200 Z'/%3E%3C/g%3E%3Cg fill='%23BA5239'%3E%3Ccircle cx='150' cy='80' r='12'/%3E%3Cpath d='M125 200 C 125 155, 142 125, 150 125 C 158 125, 175 155, 175 200 Z'/%3E%3C/g%3E%3C/svg%3E&quot;); background-size: 180px 180px; background-repeat: repeat;">
             <div class="panel-overlay">
                 <i class="fa-solid fa-landmark-dome panel-icon"></i>
-                <h2 class="panel-title title-font">2. Marco Conceptual</h2>
+                <h2 class="panel-title title-font">Marco conceptual</h2>
                 <div class="panel-content">
                     <p class="panel-desc">Lectura, aplicación e interpretación desde los referentes constitucionales.</p>
                     <button class="btn-cta" onclick="openModal('modal2')">
@@ -354,10 +391,10 @@
         </div>
 
         <!-- PANEL 3 -->
-        <div class="panel" style="background-image: url('https://images.unsplash.com/photo-1589391886645-d51941baf7fb?q=80&w=1200&auto=format&fit=crop');">
+        <div class="panel" style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%233B6B8A'/%3E%3Cg fill='%23CED82D'%3E%3Ccircle cx='70' cy='60' r='15'/%3E%3Cpath d='M40 200 C 40 145, 58 110, 70 110 C 82 110, 100 145, 100 200 Z'/%3E%3C/g%3E%3Cg fill='%23F0D0CE'%3E%3Ccircle cx='140' cy='45' r='17'/%3E%3Cpath d='M110 200 C 110 135, 128 95, 140 95 C 152 95, 170 135, 170 200 Z'/%3E%3C/g%3E%3C/svg%3E&quot;); background-size: 160px 160px; background-repeat: repeat;">
             <div class="panel-overlay">
                 <i class="fa-solid fa-gavel panel-icon"></i>
-                <h2 class="panel-title title-font">3. Perspectiva Penal</h2>
+                <h2 class="panel-title title-font">Perspectiva penal</h2>
                 <div class="panel-content">
                     <p class="panel-desc">Consecuencias prácticas y responsabilidad penal diferenciada.</p>
                     <button class="btn-cta" onclick="openModal('modal3')">
@@ -371,108 +408,270 @@
 
     <!-- MODAL 1 -->
     <div class="modal-overlay" id="modal1">
-        <div class="modal-content-box">
-            <button class="close-btn" onclick="closeModal('modal1')"><i class="fa-solid fa-xmark"></i></button>
-            <div class="modal-header">
+        <!-- Fondo color 1 (Rosa claro) -->
+        <div class="modal-content-box" style="background-color: var(--color-1);">
+            
+            <div class="modal-header-fixed">
+                <button class="close-btn" onclick="closeModal('modal1')"><i class="fa-solid fa-xmark"></i></button>
                 <i class="fa-solid fa-scale-unbalanced header-icon"></i>
                 <h2 class="modal-title title-font">Situación irregular vs protección integral</h2>
             </div>
-            <div class="modal-body">
+            
+            <div class="modal-body-scroll">
                 
-                <!-- Tarjetas Comparativas Solicitadas -->
                 <div class="comparison-grid">
-                    <div class="comp-card irregular">
+                    <div class="comp-card" style="border-top-color: var(--color-2);">
                         <h3 class="comp-title title-font"><i class="fa-solid fa-user-lock"></i> Doctrina de la situación irregular</h3>
-                        <div class="comp-item">
-                            <strong>Sujeto central:</strong> Se percibe al menor como un delincuente en potencia o desprovisto de condiciones básicas.
-                        </div>
-                        <div class="comp-item">
-                            <strong>Naturaleza jurídica:</strong> El menor es un objeto de protección, cosificado, sujeto de compasión o represión.
-                        </div>
-                        <div class="comp-item">
-                            <strong>Modelo de justicia penal:</strong> Enfoque punitivo y tutelar, basado en medidas discrecionales e internamiento institucional sin garantías.
-                        </div>
+                        <div class="comp-item"><strong>Sujeto central:</strong> Se percibe al menor como un delincuente en potencia o desprovisto de condiciones básicas.</div>
+                        <div class="comp-item"><strong>Naturaleza jurídica:</strong> El menor es un objeto de protección, cosificado, sujeto de compasión o represión.</div>
+                        <div class="comp-item"><strong>Modelo de justicia penal:</strong> Enfoque punitivo y tutelar, basado en medidas discrecionales e internamiento institucional sin garantías.</div>
                     </div>
-                    <div class="comp-card integral">
+                    <div class="comp-card" style="border-top-color: var(--color-4);">
                         <h3 class="comp-title title-font"><i class="fa-solid fa-children"></i> Doctrina de la protección integral</h3>
-                        <div class="comp-item">
-                            <strong>Sujeto central:</strong> Percibe a los niños, niñas y adolescentes como personas en crecimiento en igualdad de condiciones.
-                        </div>
-                        <div class="comp-item">
-                            <strong>Naturaleza jurídica:</strong> Auténticos sujetos plenos de derechos constitucionales y prevalentes.
-                        </div>
-                        <div class="comp-item">
-                            <strong>Modelo de justicia penal:</strong> Enfoque garantista y restaurativo, con responsabilidad penal especial respetando las garantías del proceso.
+                        <div class="comp-item"><strong>Sujeto central:</strong> Percibe a los niños, niñas y adolescentes como personas en crecimiento en igualdad de condiciones.</div>
+                        <div class="comp-item"><strong>Naturaleza jurídica:</strong> Auténticos sujetos plenos de derechos constitucionales y prevalentes.</div>
+                        <div class="comp-item"><strong>Modelo de justicia penal:</strong> Enfoque garantista y restaurativo, con responsabilidad penal especial respetando las garantías del proceso.</div>
+                    </div>
+                </div>
+
+                <!-- Acordeones Mod 1 -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>La distinción planteada...</span>
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>La distinción planteada, entre situación irregular y protección integral, no es una simple distinción teórica o conceptual sin alcance práctico. Esta distinción ha sido muy importante en el desarrollo histórico de la protección de los derechos de los niños, las niñas y los adolescentes, en este sentido García Méndez plantea que la Convención sobre los Derechos del Niño impuso un cambio en la percepción sobre la infancia que va más allá de los límites del derecho, en la medida que impuso la instauración de una nueva cultura de respeto a los Derechos Humanos de los niños, las niñas y los adolescentes sin distinción alguna, reconociéndolos como auténticos sujetos de derechos que gozan de todos los Derechos Humanos de los adultos, además de una serie de derechos especiales que les corresponde como personas en crecimiento y desarrollo.</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Textos literales -->
-                <p>La distinción planteada, entre situación irregular y protección integral, no es una simple distinción teórica o conceptual sin alcance práctico. Esta distinción ha sido muy importante en el desarrollo histórico de la protección de los derechos de los niños, las niñas y los adolescentes, en este sentido García Méndez plantea que la Convención sobre los Derechos del Niño impuso un cambio en la percepción sobre la infancia que va más allá de los límites del derecho, en la medida que impuso la instauración de una nueva cultura de respeto a los Derechos Humanos de los niños, las niñas y los adolescentes sin distinción alguna, reconociéndolos como auténticos sujetos de derechos que gozan de todos los Derechos Humanos de los adultos, además de una serie de derechos especiales que les corresponde como personas en crecimiento y desarrollo.</p>
-                <p>Para el autor citado, este cambio superó la concepción que se tenía y que se denominaba “la situación irregular” y se avanzó hacía una concepción de la “protección integral”. La primera (situación irregular), tenía como características la preponderancia de la acción judicial sobre los “menores” en situación irregular, es decir, aquellos menores desprovistos de condiciones básicas y delincuentes en potencia; no tenía en cuenta las deficiencias de las políticas sociales, y daba más importancia a las soluciones individuales de tipo represivo o administrativo cuyo resultado común era la adopción o el encerramiento en instituciones, la adopción de medidas discrecionales sin políticas sociales definidas, el tratamiento diferenciado a los menores que cometían actos penalmente relevantes con relación a los niños de familias de sectores sociales privilegiados y, en el mejor de los casos, el menor era objeto de protección, objeto de compasión/represión, objeto del derecho (Escalante Barreto, 2018), en este sentido, el menor al ser objeto de algo o de alguien era cosificado y tratado como tal.</p>
-                <p>Respecto al concepto de menor y la orientación filosófica del anterior código del menor en Colombia, la doctrina especializada fue crítica de su contenido a pesar de ser posterior a importantes instrumentos internacionales en la materia, en este sentido compartimos la tesis que plantea García (1999; 75-76), según la cual, el código del menor de 1989, a pesar de ser posterior a la Convención y haberse declarado inspirado en ella, en su interior y en la práctica o puesta en acción reproducía los vicios de las viejas legislaciones de menores, por lo que se le acusaba de ser sólo una adecuación formal a los principios de la Convención, representando una “versión elaborada y refinada de la obsoleta doctrina de la “situación irregular”. Es por esta razón, por la que se insiste en la necesidad de leer e interpretar la Ley de Infancia y Adolescencia desde una perspectiva constitucional y no desde la antigua óptica del código anterior, sino con nuevos referentes constitucionales y especialmente desde el reconocimiento de los niños, niñas y adolescentes como ciudadanos activos- sujetos de derechos.</p>
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Para el autor citado...</span>
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>Para el autor citado, este cambio superó la concepción que se tenía y que se denominaba “la situación irregular” y se avanzó hacía una concepción de la “protección integral”. La primera (situación irregular), tenía como características la preponderancia de la acción judicial sobre los “menores” en situación irregular, es decir, aquellos menores desprovistos de condiciones básicas y delincuentes en potencia; no tenía en cuenta las deficiencias de las políticas sociales, y daba más importancia a las soluciones individuales de tipo represivo o administrativo cuyo resultado común era la adopción o el encerramiento en instituciones, la adopción de medidas discrecionales sin políticas sociales definidas, el tratamiento diferenciado a los menores que cometían actos penalmente relevantes con relación a los niños de familias de sectores sociales privilegiados y, en el mejor de los casos, el menor era objeto de protección, objeto de compasión/represión, objeto del derecho (Escalante Barreto, 2018), en este sentido, el menor al ser objeto de algo o de alguien era cosificado y tratado como tal.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Respecto al concepto de menor...</span>
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>Respecto al concepto de menor y la orientación filosófica del anterior código del menor en Colombia, la doctrina especializada fue crítica de su contenido a pesar de ser posterior a importantes instrumentos internacionales en la materia, en este sentido compartimos la tesis que plantea García (1999; 75-76), según la cual, el código del menor de 1989, a pesar de ser posterior a la Convención y haberse declarado inspirado en ella, en su interior y en la práctica o puesta en acción reproducía los vicios de las viejas legislaciones de menores, por lo que se le acusaba de ser sólo una adecuación formal a los principios de la Convención, representando una “versión elaborada y refinada de la obsoleta doctrina de la “situación irregular”. Es por esta razón, por la que se insiste en la necesidad de leer e interpretar la Ley de Infancia y Adolescencia desde una perspectiva constitucional y no desde la antigua óptica del código anterior, sino con nuevos referentes constitucionales y especialmente desde el reconocimiento de los niños, niñas y adolescentes como ciudadanos activos- sujetos de derechos.</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
     <!-- MODAL 2 -->
     <div class="modal-overlay" id="modal2">
-        <div class="modal-content-box">
-            <button class="close-btn" onclick="closeModal('modal2')"><i class="fa-solid fa-xmark"></i></button>
-            <div class="modal-header">
+        <!-- Fondo color 5 (Amarillo pálido) -->
+        <div class="modal-content-box" style="background-color: var(--color-5);">
+            
+            <div class="modal-header-fixed">
+                <button class="close-btn" onclick="closeModal('modal2')"><i class="fa-solid fa-xmark"></i></button>
                 <i class="fa-solid fa-landmark-dome header-icon"></i>
-                <h2 class="modal-title title-font">Interpretación y Marco Constitucional</h2>
+                <h2 class="modal-title title-font">Interpretación y marco constitucional</h2>
             </div>
-            <div class="modal-body">
+            
+            <div class="modal-body-scroll">
                 
-                <!-- Texto resaltado con estilo CSS -->
                 <div class="highlight-box">
                     <i class="fa-solid fa-quote-left" style="color: var(--color-2); margin-right: 10px;"></i>
                     Si en materia penal se habla de la necesidad de que la acción punitiva del Estado sea la última ratio, en materia de infancia y adolescencia esa última ratio está reforzada bajo el entendido de que toda restricción de derechos y limitación de garantías debe hacerse en el marco del proceso penal con todas las garantías y no en el ámbito administrativo.
                 </div>
 
-                <p>La doctrina de la protección integral está orientada al reconocimiento de la infancia y adolescencia en igualdad de condiciones; esto es, los niños, niñas y adolescentes como sujetos plenos de derecho, de derechos fundamentales prevalentes. En esta concepción constitucionalmente orientada, no se hacen distinciones entre niñez y menores, se busca la articulación de políticas públicas para mejorar las condiciones de vida de la infancia y la adolescencia en igualdad de condiciones y se busca la corresponsabilidad en el restablecimiento de sus derechos en caso de ser vulnerados.</p>
-                <p>Dicho contexto de diferenciación orienta el marco conceptual para la lectura, aplicación e interpretación que debemos dar a la ley de infancia y adolescencia, el tratamiento de los niños, las niñas y los adolescentes como sujetos de derechos implica, como se verá, el reconocimiento como sujetos que construyen su realidad social y que deben por tanto participar en las decisiones que sobre la misma se deban adoptar, no solo a nivel familiar, sino social y de políticas públicas que versen en el ámbito de sus derechos.</p>
-                <p>A pesar del avance de tipo normativo que implica la ley en comento, es necesario adoptar nuevos modelos de interpretación que materialicen y realicen en la práctica las condiciones anunciadas, que den en la cotidianeidad el sentido al concepto de niños y niñas, que supere la vieja concepción del menor como objeto del derecho o de la sociedad.</p>
-                <p>Recapitulando, encontramos en el Código de la Infancia y Adolescencia diversos referentes que permiten identificar que el paradigma de la “situación irregular” debe ser superado en la práctica, no sólo desde el punto de vista formal, sino desde el punto de vista material, es decir, desde la práctica se deben cumplir los derechos de los niños, niñas y adolescentes como sujetos de derecho, su desarrollo y protección integral a través del planteamiento de planes, políticas, programas y acciones que hagan posible su materialización; las normas constitucionales han recuperado el sentido de lo humano en la legislación de la infancia en Colombia al plantear con fuerza normativa y remisión expresa la aplicación preferente de instrumentos y estándares internacionales de Derechos Humanos, en relación con los niños, las niñas y los adolescentes.</p>
-                <p>En este orden de ideas, se deben tomar en serio los derechos fundamentales consagrados en la Constitución a favor de esta población de protección especial, cuyo carácter normativo es de aplicación inmediata, igualmente en el contexto del tratamiento de los derechos de la infancia y adolescencia se deben tener en cuenta los tratados o convenios internacionales sobre Derechos Humanos que hacen parte del bloque de constitucionalidad, en especial la Convención sobre los Derechos del Niño y la doctrina de instancias internacionales que desarrollan dichos tratados como herramientas de interpretación.</p>
-                <p>En este sentido se debe recordar que en Colombia la Constitución es norma de normas, sus reglas jurídicas tienen fuerza normativa y por tanto se deben aplicar por todos los operadores jurídicos en su actuación cotidiana.</p>
+                <!-- Acordeones Mod 2 -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>La doctrina de la protección...</span>
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>La doctrina de la protección integral está orientada al reconocimiento de la infancia y adolescencia en igualdad de condiciones; esto es, los niños, niñas y adolescentes como sujetos plenos de derecho, de derechos fundamentales prevalentes. En esta concepción constitucionalmente orientada, no se hacen distinciones entre niñez y menores, se busca la articulación de políticas públicas para mejorar las condiciones de vida de la infancia y la adolescencia en igualdad de condiciones y se busca la corresponsabilidad en el restablecimiento de sus derechos en caso de ser vulnerados.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Dicho contexto de diferenciación...</span>
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>Dicho contexto de diferenciación orienta el marco conceptual para la lectura, aplicación e interpretación que debemos dar a la ley de infancia y adolescencia, el tratamiento de los niños, las niñas y los adolescentes como sujetos de derechos implica, como se verá, el reconocimiento como sujetos que construyen su realidad social y que deben por tanto participar en las decisiones que sobre la misma se deban adoptar, no solo a nivel familiar, sino social y de políticas públicas que versen en el ámbito de sus derechos.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>A pesar del avance...</span>
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>A pesar del avance de tipo normativo que implica la ley en comento, es necesario adoptar nuevos modelos de interpretación que materialicen y realicen en la práctica las condiciones anunciadas, que den en la cotidianeidad el sentido al concepto de niños y niñas, que supere la vieja concepción del menor como objeto del derecho o de la sociedad.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Recapitulando, encontramos en el...</span>
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>Recapitulando, encontramos en el Código de la Infancia y Adolescencia diversos referentes que permiten identificar que el paradigma de la “situación irregular” debe ser superado en la práctica, no sólo desde el punto de vista formal, sino desde el punto de vista material, es decir, desde la práctica se deben cumplir los derechos de los niños, niñas y adolescentes como sujetos de derecho, su desarrollo y protección integral a través del planteamiento de planes, políticas, programas y acciones que hagan posible su materialización; las normas constitucionales han recuperado el sentido de lo humano en la legislación de la infancia en Colombia al plantear con fuerza normativa y remisión expresa la aplicación preferente de instrumentos y estándares internacionales de Derechos Humanos, en relación con los niños, las niñas y los adolescentes.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>En este orden de ideas...</span>
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>En este orden de ideas, se deben tomar en serio los derechos fundamentales consagrados en la Constitución a favor de esta población de protección especial, cuyo carácter normativo es de aplicación inmediata, igualmente en el contexto del tratamiento de los derechos de la infancia y adolescencia se deben tener en cuenta los tratados o convenios internacionales sobre Derechos Humanos que hacen parte del bloque de constitucionalidad, en especial la Convención sobre los Derechos del Niño y la doctrina de instancias internacionales que desarrollan dichos tratados como herramientas de interpretación.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>En este sentido se debe...</span>
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>En este sentido se debe recordar que en Colombia la Constitución es norma de normas, sus reglas jurídicas tienen fuerza normativa y por tanto se deben aplicar por todos los operadores jurídicos en su actuación cotidiana.</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
     <!-- MODAL 3 -->
     <div class="modal-overlay" id="modal3">
-        <div class="modal-content-box">
-            <button class="close-btn" onclick="closeModal('modal3')"><i class="fa-solid fa-xmark"></i></button>
-            <div class="modal-header">
+        <!-- Fondo color 4 (Verde lima) -->
+        <div class="modal-content-box" style="background-color: var(--color-4);">
+            
+            <div class="modal-header-fixed">
+                <button class="close-btn" onclick="closeModal('modal3')"><i class="fa-solid fa-xmark"></i></button>
                 <i class="fa-solid fa-gavel header-icon"></i>
-                <h2 class="modal-title title-font">Perspectiva Penal</h2>
+                <h2 class="modal-title title-font">Perspectiva penal</h2>
             </div>
-            <div class="modal-body">
-                <p>Desde el punto de vista penal: ¿Cuál cree usted que es la consecuencia práctica más importante de este paradigma constitucional?</p>
-                <p>El niño, la niña o los adolescentes al ser sujetos de derechos se conciben como sujetos titulares de derechos y titulares de obligaciones, también son responsables por sus actuaciones conforme a su edad y capacidad. A partir de dicha distinción, los niños, niñas y adolescentes son sujetos responsables penalmente en un sistema penal especial y diferenciado.</p>
-                <p>Los adolescentes ya no son inimputables, son sujetos responsables penalmente.</p>
+            
+            <div class="modal-body-scroll">
+                
+                <!-- Acordeones Mod 3 -->
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Desde el punto de vista...</span>
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>Desde el punto de vista penal: ¿Cuál cree usted que es la consecuencia práctica más importante de este paradigma constitucional?</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>El niño, la niña o...</span>
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>El niño, la niña o los adolescentes al ser sujetos de derechos se conciben como sujetos titulares de derechos y titulares de obligaciones, también son responsables por sus actuaciones conforme a su edad y capacidad. A partir de dicha distinción, los niños, niñas y adolescentes son sujetos responsables penalmente en un sistema penal especial y diferenciado.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAccordion(this)">
+                        <span>Los adolescentes ya no son...</span>
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>Los adolescentes ya no son inimputables, son sujetos responsables penalmente.</p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
     <script>
-        // Función para abrir los modales correspondientes a cada panel
         function openModal(modalId) {
             document.getElementById(modalId).classList.add('active');
         }
 
-        // Función para cerrar los modales
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
         }
 
-        // Cerrar modal al hacer clic fuera del contenido
+        // Cierra los modales al dar clic afuera
         window.onclick = function(event) {
             if (event.target.classList.contains('modal-overlay')) {
                 event.target.classList.remove('active');
             }
+        }
+
+        // Lógica del acordeón (Abre uno, cierra los demás)
+        function toggleAccordion(element) {
+            const parent = element.parentElement;
+            const modalBody = parent.closest('.modal-body-scroll');
+            const content = parent.querySelector('.accordion-content');
+            const icon = element.querySelector('.fa-solid');
+            
+            // Si ya está activo, lo cerramos
+            if (parent.classList.contains('active')) {
+                parent.classList.remove('active');
+                content.style.maxHeight = null;
+                icon.classList.remove('fa-minus');
+                icon.classList.add('fa-plus');
+                return;
+            }
+
+            // Cerramos todos los acordeones del mismo modal
+            modalBody.querySelectorAll('.accordion-item').forEach(item => {
+                item.classList.remove('active');
+                item.querySelector('.accordion-content').style.maxHeight = null;
+                const itemIcon = item.querySelector('.accordion-header i');
+                if(itemIcon) {
+                    itemIcon.classList.remove('fa-minus');
+                    itemIcon.classList.add('fa-plus');
+                }
+            });
+
+            // Abrimos el seleccionado
+            parent.classList.add('active');
+            content.style.maxHeight = content.scrollHeight + "px";
+            icon.classList.remove('fa-plus');
+            icon.classList.add('fa-minus');
         }
     </script>
 </body>

@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVA - Protección Integral vs Situación Irregular</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Roboto:wght@400;500;700&display=swap');
+
+        :root {
+            --color-1: #F0D0CE; /* Rosa claro */
+            --color-2: #BA5239; /* Rojo óxido */
+            --color-3: rgba(70, 99, 96, 1.00); /* #466360 - Verde pizarra */
+            --color-4: #CED82D; /* Verde lima */
+            --color-5: #F3F4BC; /* Amarillo pálido */
+            --color-6: #3B6B8A; /* Azul acero */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100vh;
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden; /* Evita scroll en el marco principal */
+            background-color: #f7f9f9;
+        }
+
+        h1, h2, h3, .title-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Contenedor de la Aplicación */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100vh;
+            background-image: url('https://images.unsplash.com/photo-1594608661623-aa0bd3a69d98?q=80&w=2000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.92);
+            z-index: 1;
+        }
+
+        /* Encabezado fijo y contexto */
+        .header-context {
+            position: relative;
+            z-index: 5;
+            padding: 15px 30px;
+            background: white;
+            border-bottom: 4px solid var(--color-4);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+
+        .header-context h1 {
+            color: var(--color-6);
+            font-size: 22px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-context h1 i { color: var(--color-3); }
+
+        .context-text {
+            font-size: 13px;
+            color: #444;
+            line-height: 1.4;
+            max-width: 100%;
+        }
+
+        /* Contenedor de Vistas (Paneles) */
+        .views-container {
+            position: relative;
+            z-index: 2;
+            flex-grow: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: stretch;
+        }
+
+        .view-panel {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            transform: translateY(20px);
+            padding: 20px 30px;
+            overflow-y: auto; /* Scroll interno solo cuando sea necesario */
+        }
+
+        .view-panel.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* --- 1. TARJETAS GIRATORIAS (FLIP CARDS) --- */
+        .flip-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding-bottom: 20px;
+        }
+
+        .flip-card {
+            background-color: transparent;
+            width: 100%;
+            height: 250px;
+            perspective: 1000px; /* Perspectiva 3D */
+            cursor: pointer;
+        }
+
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 15px;
+        }
+
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Frente: Modelo Antiguo (Situación Irregular) */
+        .flip-card-front {
+            background-color: var(--color-1);
+            border-bottom: 6px solid var(--color-2);
+            color: #333;
+        }
+
+        .flip-card-front i {
+            font-size: 40px;
+            color: var(--color-2);
+            margin-bottom: 15px;
+        }
+
+        /* Reverso: Modelo Actual (Protección Integral) */
+        .flip-card-back {
+            background-color: var(--color-5);
+            border-bottom: 6px solid var(--color-4);
+            color: #333;
+            transform: rotateY(180deg);
+        }
+
+        .flip-card-back i {
+            font-size: 40px;
+            color: var(--color-3);
+            margin-bottom: 15px;
+        }
+
+        .flip-title {
+            font-size: 16px;
+            color: var(--color-6);
+            margin-bottom: 10px;
+        }
+
+        .flip-text {
+            font-size: 14px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        /* --- 2. LÍNEA DE TIEMPO --- */
+        .timeline-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            background-color: var(--color-1);
+            top: 20px;
+            bottom: 20px;
+            left: 50%;
+            margin-left: -2px;
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+        }
+
+        .timeline-item.left { left: 0; }
+        .timeline-item.right { left: 50%; }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            right: -10px;
+            background-color: white;
+            border: 4px solid var(--color-2);
+            top: 25px;
+            border-radius: 50%;
+            z-index: 1;
+            transition: background 0.3s, transform 0.3s;
+        }
+
+        .timeline-item.right::after {
+            left: -10px;
+        }
+
+        .timeline-item:hover::after {
+            background-color: var(--color-4);
+            transform: scale(1.3);
+        }
+
+        .timeline-content {
+            padding: 15px 25px;
+            background-color: white;
+            position: relative;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--color-3);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .timeline-item:hover .timeline-content {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .timeline-year {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            color: var(--color-2);
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-title {
+            font-size: 15px;
+            color: var(--color-6);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .timeline-desc {
+            font-size: 13px;
+            line-height: 1.4;
+            color: #444;
+        }
+
+        /* --- 3. INFOGRAFÍA DE CONTRASTE --- */
+        .infographic-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            height: 100%;
+        }
+        
+        .info-col {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .col-irregular { border-top: 8px solid var(--color-2); }
+        .col-integral { border-top: 8px solid var(--color-4); }
+
+        .info-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0,0,0,0.05);
+        }
+
+        .info-header i {
+            font-size: 45px;
+            margin-bottom: 10px;
+        }
+        
+        .col-irregular .info-header i { color: var(--color-2); }
+        .col-integral .info-header i { color: var(--color-3); }
+
+        .info-header h3 {
+            color: var(--color-6);
+            font-size: 18px;
+        }
+
+        .info-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .info-list li {
+            position: relative;
+            padding-left: 35px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+        }
+
+        .info-list li::before {
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            top: 2px;
+            font-size: 20px;
+        }
+
+        .col-irregular .info-list li::before {
+            content: '\f00d'; /* fa-xmark */
+            color: var(--color-2);
+        }
+        
+        .col-integral .info-list li::before {
+            content: '\f00c'; /* fa-check */
+            color: var(--color-3);
+        }
+
+        /* --- BARRA DE NAVEGACIÓN INFERIOR --- */
+        .nav-bar {
+            position: relative;
+            z-index: 10;
+            background: var(--color-6);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+        }
+
+        .nav-btn {
+            background: white;
+            color: var(--color-6);
+            border: 2px solid transparent;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn.active {
+            background: var(--color-4);
+            color: var(--color-3);
+            border-color: white;
+        }
+
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.04); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--color-3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--color-6); }
+
+        /* Media Queries */
+        @media screen and (max-width: 768px) {
+            .timeline-container::after { left: 31px; }
+            .timeline-item { width: 100%; padding-left: 70px; padding-right: 25px; }
+            .timeline-item.right { left: 0; }
+            .timeline-item::after { left: 21px !important; }
+            .nav-bar { flex-wrap: wrap; padding: 10px; }
+            .nav-btn { width: 100%; justify-content: center; }
+            .header-context { padding: 15px; }
+            .header-context h1 { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="overlay"></div>
+        
+        <!-- ENCABEZADO FIJO -->
+        <div class="header-context">
+            <h1 class="title-font"><i class="fa-solid fa-graduation-cap"></i> Recapitulación y Síntesis</h1>
+            <div class="context-text">
+                Como se ha observado hasta el momento, se puede inferir que la doctrina de la protección integral implica que los niños, niñas y adolescentes son responsables de sus conductas, es decir, de sus acciones y, por qué no, de sus omisiones al ser sujetos de derechos. Pero su responsabilidad penal está limitada por su condición de persona de especial protección constitucional, por lo tanto, la Ley prevé un sistema especial y diferenciado en consideración a su etapa.
+            </div>
+        </div>
+
+        <!-- CONTENEDOR DE VISTAS (Paneles sin scroll general) -->
+        <div class="views-container">
+            
+            <!-- VISTA 1: FLIP CARDS -->
+            <div class="view-panel active" id="view-cards">
+                <div class="flip-cards-grid">
+                    
+                    <!-- Tarjeta 1 -->
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <i class="fa-solid fa-user-lock"></i>
+                                <h3 class="flip-title title-font">Concepción del sujeto</h3>
+                                <div class="flip-text">El "menor" como objeto de protección/represión.</div>
+                            </div>
+                            <div class="flip-card-back">
+                                <i class="fa-solid fa-children"></i>
+                                <h3 class="flip-title title-font">Evolución</h3>
+                                <div class="flip-text">El Niño, Niña y Adolescente como sujeto pleno de derechos.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 2 -->
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <i class="fa-solid fa-gavel"></i>
+                                <h3 class="flip-title title-font">Tratamiento de la pobreza</h3>
+                                <div class="flip-text">Judicialización y criminalización de la pobreza.</div>
+                            </div>
+                            <div class="flip-card-back">
+                                <i class="fa-solid fa-house-chimney-window"></i>
+                                <h3 class="flip-title title-font">Evolución</h3>
+                                <div class="flip-text">Separación categórica entre problemas sociales y conflictos penales.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 3 -->
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <i class="fa-solid fa-user-tie"></i>
+                                <h3 class="flip-title title-font">Figura de autoridad</h3>
+                                <div class="flip-text">Centralización en el juez de menores con potestad omnímoda.</div>
+                            </div>
+                            <div class="flip-card-back">
+                                <i class="fa-solid fa-scale-balanced"></i>
+                                <h3 class="flip-title title-font">Evolución</h3>
+                                <div class="flip-text">Sistema especializado, garantista e Interés Superior del Niño.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 4 -->
+                    <div class="flip-card">
+                        <div class="flip-card-inner">
+                            <div class="flip-card-front">
+                                <i class="fa-solid fa-handcuffs"></i>
+                                <h3 class="flip-title title-font">Respuesta punitiva</h3>
+                                <div class="flip-text">Ausencia de garantías procesales y eufemismos punitivos.</div>
+                            </div>
+                            <div class="flip-card-back">
+                                <i class="fa-solid fa-handshake-angle"></i>
+                                <h3 class="flip-title title-font">Evolución</h3>
+                                <div class="flip-text">Mínima intervención, excepcionalidad de la privación de libertad y justicia restaurativa.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- VISTA 2: LÍNEA DE TIEMPO -->
+            <div class="view-panel" id="view-timeline">
+                <div class="timeline-container">
+                    
+                    <div class="timeline-item left">
+                        <div class="timeline-content">
+                            <div class="timeline-year">1899</div>
+                            <div class="timeline-title">Primer Tribunal de Menores en Chicago</div>
+                            <div class="timeline-desc">Surgimiento institucional de la concepción del "menor" y la doctrina de la situación irregular.</div>
+                        </div>
+                    </div>
+                    
+                    <div class="timeline-item right">
+                        <div class="timeline-content">
+                            <div class="timeline-year">1919</div>
+                            <div class="timeline-title">Ley Agote en Argentina</div>
+                            <div class="timeline-desc">Expansión del modelo tutelar y de los códigos de menores tradicionales en América Latina.</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item left">
+                        <div class="timeline-content">
+                            <div class="timeline-year">1985 - 1990</div>
+                            <div class="timeline-title">Corpus juris internacional</div>
+                            <div class="timeline-desc">Integración de las Reglas de Beijing (1985), las Directrices de Riad (1990) y las Reglas para Jóvenes Privados de Libertad (1990).</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item right">
+                        <div class="timeline-content">
+                            <div class="timeline-year">1989</div>
+                            <div class="timeline-title">Convención Internacional sobre los Derechos del Niño (CDN) y Decreto 2737</div>
+                            <div class="timeline-desc">Ratificación de la CDN (Protección Integral) y promulgación del Código del Menor en Colombia (Decreto 2737).</div>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item left">
+                        <div class="timeline-content">
+                            <div class="timeline-year">2006</div>
+                            <div class="timeline-title">Ley 1098 de 2006 en Colombia</div>
+                            <div class="timeline-desc">Cristalización a nivel interno del reconocimiento del niño, niña y adolescente como sujeto pleno de derechos.</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- VISTA 3: INFOGRAFÍA DE CONTRASTE -->
+            <div class="view-panel" id="view-info">
+                <div class="infographic-grid">
+                    
+                    <!-- Columna Izquierda -->
+                    <div class="info-col col-irregular">
+                        <div class="info-header">
+                            <i class="fa-solid fa-weight-hanging"></i>
+                            <h3 class="title-font">Doctrina de la Situación Irregular</h3>
+                        </div>
+                        <ul class="info-list">
+                            <li>Enfoque en dicotomía discriminatoria en la infancia (niños vs "menores" de sectores excluidos).</li>
+                            <li>Incapacidad asumida normativamente bajo una perspectiva paternalista, objeto de compasión y represión.</li>
+                            <li>Ausencia sustancial de garantías procesales y eufemismos para encubrir la privación de libertad.</li>
+                            <li>Rol paternalista del Estado y centralización en el juez de menores con potestad omnímoda.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Columna Derecha -->
+                    <div class="info-col col-integral">
+                        <div class="info-header">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                            <h3 class="title-font">Doctrina de la Protección Integral</h3>
+                        </div>
+                        <ul class="info-list">
+                            <li>Enfoque en ciudadanía plena, titular activo de derechos humanos universales e interdependientes.</li>
+                            <li>Corresponsabilidad tripartita y solidaria (Familia, Sociedad y Estado) para el restablecimiento de derechos.</li>
+                            <li>Sistema de responsabilidad penal dotado de todas las garantías del debido proceso acusatorio.</li>
+                            <li>Enfoque pedagógico, educativo y restaurativo; privación de libertad como excepcional y última ratio.</li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+        <div class="nav-bar">
+            <button class="nav-btn active" onclick="switchView('view-cards', this)">
+                <i class="fa-solid fa-layer-group"></i> Tarjetas
+            </button>
+            <button class="nav-btn" onclick="switchView('view-timeline', this)">
+                <i class="fa-solid fa-timeline"></i> Cronología
+            </button>
+            <button class="nav-btn" onclick="switchView('view-info', this)">
+                <i class="fa-solid fa-table-columns"></i> El Peso de la Justicia
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        function switchView(viewId, btnElement) {
+            // Quitar clase active de todos los paneles
+            document.querySelectorAll('.view-panel').forEach(panel => {
+                panel.classList.remove('active');
+            });
+            // Mostrar panel seleccionado
+            document.getElementById(viewId).classList.add('active');
+
+            // Actualizar estado de los botones
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            btnElement.classList.add('active');
+        }
+    </script>
+</body>
+</html>

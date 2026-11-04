@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cinema Quiz: Gemini & NotebookLM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to right, #2a0000, #0a0000 20%, #0a0000 80%, #2a0000);
+            color: white;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        h1, h2, .cinema-font {
+            font-family: 'Bebas Neue', cursive;
+            letter-spacing: 2px;
+        }
+
+        /* Cinema Curtains */
+        .curtains {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            background: 
+                linear-gradient(to right, rgba(80,0,0,0.8) 0%, transparent 15%, transparent 85%, rgba(80,0,0,0.8) 100%),
+                linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 10%, transparent 100%);
+        }
+
+        /* The Projection Screen */
+        .cinema-screen {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            box-shadow: 
+                0 0 50px 10px rgba(255, 255, 255, 0.1),
+                inset 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .screen-glow {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 40px;
+            background: radial-gradient(ellipse, rgba(255,255,255,0.4) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .correct-flash { box-shadow: 0 0 80px 20px rgba(34, 197, 94, 0.4); }
+        .incorrect-flash { box-shadow: 0 0 80px 20px rgba(239, 68, 68, 0.4); }
+
+        /* Dashboard Circular Progress */
+        .circular-chart {
+            display: block;
+            margin: 0 auto;
+            max-width: 80%;
+            max-height: 250px;
+        }
+        .circle-bg {
+            fill: none;
+            stroke: #1e293b;
+            stroke-width: 3.8;
+        }
+        .circle {
+            fill: none;
+            stroke-width: 2.8;
+            stroke-linecap: round;
+            transition: stroke-dasharray 1.5s ease-out;
+        }
+        .percentage {
+            fill: #ffffff;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 10px;
+            text-anchor: middle;
+        }
+
+        /* Drag and Drop Elements */
+        .draggable-item {
+            cursor: grab;
+            transition: transform 0.1s;
+        }
+        .draggable-item:active { cursor: grabbing; transform: scale(0.95); }
+        .dropzone {
+            border: 2px dashed #94a3b8;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .dropzone.drag-over {
+            background-color: #e2e8f0;
+            border-color: #3b82f6;
+        }
+
+        /* Buttons & Interactions */
+        .btn-option {
+            transition: all 0.2s;
+        }
+        .btn-option:hover { transform: translateY(-2px); }
+        .btn-option:active { transform: translateY(1px); }
+
+        /* Hide elements utility */
+        .hidden-view { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="curtains"></div>
+
+    <!-- WELCOME SCREEN -->
+    <div id="welcome-screen" class="z-20 flex flex-col items-center text-center max-w-2xl mx-auto space-y-8 p-6 bg-black/60 rounded-2xl border border-red-900 backdrop-blur-sm">
+        <h1 class="text-6xl md:text-8xl text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]">CINE-QUIZ</h1>
+        <h2 class="text-2xl md:text-3xl text-gray-300">Gemini & NotebookLM Premiere</h2>
+        <p class="text-gray-400 text-lg">
+            Test your knowledge on Google's AI tools! You have exactly <strong>2 minutes</strong> to answer as many of the 50 questions as you can.
+        </p>
+        <div class="flex space-x-4">
+            <span class="px-3 py-1 bg-gray-800 rounded text-sm text-gray-300 shadow">Multiple Choice</span>
+            <span class="px-3 py-1 bg-gray-800 rounded text-sm text-gray-300 shadow">True/False</span>
+            <span class="px-3 py-1 bg-gray-800 rounded text-sm text-gray-300 shadow">Fill Gap</span>
+            <span class="px-3 py-1 bg-gray-800 rounded text-sm text-gray-300 shadow">Drag & Drop</span>
+        </div>
+        <button onclick="startGame()" class="mt-8 px-10 py-4 bg-red-600 hover:bg-red-500 text-white cinema-font text-3xl rounded-full shadow-[0_0_20px_rgba(220,38,38,0.6)] transition-all transform hover:scale-105">
+            START PREMIERE
+        </button>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="quiz-screen" class="hidden-view z-20 w-full max-w-4xl flex flex-col items-center">
+        <!-- Header Info -->
+        <div class="w-full flex justify-between items-center mb-6 px-4">
+            <div class="text-xl font-bold text-gray-300">
+                Question: <span id="q-counter" class="text-white">1</span>/50
+            </div>
+            <div id="timer-container" class="text-3xl cinema-font text-white bg-black/50 px-6 py-2 rounded-full border border-gray-700 shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-colors">
+                <span id="timer">02:00</span>
+            </div>
+            <div class="text-xl font-bold text-gray-300">
+                Score: <span id="score-counter" class="text-green-400">0</span>
+            </div>
+        </div>
+
+        <!-- Cinema Screen Area -->
+        <div id="cinema-screen-container" class="cinema-screen w-full aspect-video md:aspect-[21/9] rounded-xl flex flex-col justify-center items-center p-6 md:p-12 relative overflow-hidden">
+            <div class="screen-glow"></div>
+            
+            <div id="question-container" class="w-full h-full flex flex-col justify-center items-center text-center space-y-6">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+        
+        <!-- Controls for specific questions -->
+        <div class="h-16 mt-4 flex items-center justify-center w-full">
+            <button id="next-btn" onclick="nextQuestion(true)" class="hidden-view px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full shadow-lg transition-all">Skip Question</button>
+        </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="results-screen" class="hidden-view z-20 flex flex-col items-center text-center max-w-3xl mx-auto w-full p-8 bg-black/80 rounded-3xl border border-gray-800 shadow-[0_0_40px_rgba(0,0,0,0.9)] backdrop-blur-md">
+        <h1 class="text-5xl text-yellow-500 cinema-font mb-2 drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]">THE CREDITS ROLL</h1>
+        <p class="text-gray-300 text-lg mb-8">Let's see how you performed in the director's chair.</p>
+        
+        <div class="flex flex-col md:flex-row w-full items-center justify-center gap-8 mb-8">
+            <!-- Circular Chart -->
+            <div class="w-48 h-48 relative">
+                <svg viewBox="0 0 36 36" class="circular-chart text-blue-500">
+                    <path class="circle-bg"
+                        d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <path class="circle" id="result-circle"
+                        stroke="currentColor"
+                        stroke-dasharray="0, 100"
+                        d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <text x="18" y="21" class="percentage" id="result-percentage">0%</text>
+                </svg>
+            </div>
+
+            <!-- Stats -->
+            <div class="flex flex-col gap-4 text-left">
+                <div class="flex items-center bg-green-900/30 border border-green-800 p-4 rounded-xl">
+                    <div class="text-green-500 text-3xl mr-4 cinema-font">✓</div>
+                    <div>
+                        <div class="text-gray-400 text-sm">Correct Answers</div>
+                        <div class="text-2xl font-bold text-white" id="stat-correct">0</div>
+                    </div>
+                </div>
+                <div class="flex items-center bg-red-900/30 border border-red-800 p-4 rounded-xl">
+                    <div class="text-red-500 text-3xl mr-4 cinema-font">✗</div>
+                    <div>
+                        <div class="text-gray-400 text-sm">Incorrect Answers</div>
+                        <div class="text-2xl font-bold text-white" id="stat-incorrect">0</div>
+                    </div>
+                </div>
+                <div class="flex items-center bg-gray-800/50 border border-gray-700 p-4 rounded-xl">
+                    <div class="text-gray-400 text-3xl mr-4 cinema-font">-</div>
+                    <div>
+                        <div class="text-gray-400 text-sm">Unanswered</div>
+                        <div class="text-2xl font-bold text-white" id="stat-unanswered">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="resetGame()" class="px-10 py-4 bg-yellow-600 hover:bg-yellow-500 text-white cinema-font text-3xl rounded-full shadow-[0_0_20px_rgba(202,138,4,0.4)] transition-all transform hover:scale-105">
+            PLAY AGAIN
+        </button>
+    </div>
+
+    <script>
+        // --- 50 Questions Database (25 Gemini, 25 NotebookLM) ---
+        // Types: 'mc' (Multiple Choice), 'tf' (True/False), 'gap' (Gap Fill), 'drag' (Single Drag into Dropzone)
+        const allQuestions = [
+            // --- GEMINI (25 Questions) ---
+            { type: 'tf', q: 'Gemini is an AI model developed by Google.', a: true },
+            { type: 'mc', q: 'Which of the following is a primary capability of Gemini?', options: ['Baking bread', 'Multimodal processing', 'Physical construction', 'Driving cars'], a: 1 },
+            { type: 'gap', q: 'Gemini is designed to be [GAP] from the ground up, meaning it understands text, images, and audio natively.', options: ['Monolithic', 'Multimodal', 'Rule-based', 'Offline'], a: 1 },
+            { type: 'drag', q: 'Drag the correct term: Instructions you provide to an AI like Gemini are called...', options: ['Parameters', 'Prompts', 'Tokens'], a: 1 },
+            { type: 'tf', q: 'Gemini Advanced requires a paid subscription via Google One.', a: true },
+            { type: 'mc', q: 'What does "multimodal" mean in the context of Gemini?', options: ['It runs on multiple servers', 'It speaks multiple languages', 'It processes text, images, code, and audio', 'It has multiple personalities'], a: 2 },
+            { type: 'gap', q: 'To write code with Gemini, you just need to provide a clear [GAP] detailing the requirements.', options: ['Prompt', 'Database', 'Compiler', 'Algorithm'], a: 0 },
+            { type: 'drag', q: 'Drag the capability: Gemini can analyze data from an uploaded...', options: ['Mouse', 'Spreadsheet', 'Monitor'], a: 1 },
+            { type: 'tf', q: 'Gemini cannot generate Python code.', a: false },
+            { type: 'mc', q: 'Which version of Gemini is optimized for mobile devices?', options: ['Gemini Ultra', 'Gemini Pro', 'Gemini Nano', 'Gemini Max'], a: 2 },
+            { type: 'gap', q: 'Gemini integrates with Google [GAP] to help draft emails and documents.', options: ['Workspace', 'Hardware', 'Maps', 'Cloud'], a: 0 },
+            { type: 'drag', q: 'Drag to complete: Gemini is a type of Large [GAP] Model.', options: ['Language', 'Logic', 'Linear'], a: 0 },
+            { type: 'tf', q: 'You can upload images to Gemini and ask questions about them.', a: true },
+            { type: 'mc', q: 'What is the most capable size of the Gemini model?', options: ['Nano', 'Pro', 'Ultra', 'Micro'], a: 2 },
+            { type: 'gap', q: 'When Gemini makes up false information, it is called a [GAP].', options: ['Hallucination', 'Dream', 'Glitch', 'Feature'], a: 0 },
+            { type: 'drag', q: 'Drag the feature: Gemini can act as a coding...', options: ['Obstacle', 'Assistant', 'Virus'], a: 1 },
+            { type: 'tf', q: 'Gemini stores all user prompts publicly forever by default.', a: false },
+            { type: 'mc', q: 'Which Google app prominently features Gemini for writing assistance?', options: ['Google Docs', 'Google Earth', 'Google Fit', 'Google Keep'], a: 0 },
+            { type: 'gap', q: 'Gemini replaced Google\'s previous conversational AI known as [GAP].', options: ['Bard', 'Assistant', 'Siri', 'Cortana'], a: 0 },
+            { type: 'drag', q: 'Drag the answer: Gemini can summarize long YouTube...', options: ['Comments', 'Videos', 'Thumbnails'], a: 1 },
+            { type: 'tf', q: 'Gemini can translate text between dozens of languages.', a: true },
+            { type: 'mc', q: 'How does Gemini process audio?', options: ['Converts it to text first', 'Processes the raw audio natively', 'Sends it to human transcribers', 'It cannot process audio'], a: 1 },
+            { type: 'gap', q: 'To get better answers from Gemini, you should provide [GAP] context.', options: ['Less', 'More', 'Zero', 'Confusing'], a: 1 },
+            { type: 'drag', q: 'Drag the tool: Gemini is accessed primarily through a web...', options: ['Interface', 'Cable', 'Database'], a: 0 },
+            { type: 'tf', q: 'Gemini can generate images based on text descriptions.', a: true },
+
+            // --- NOTEBOOKLM (25 Questions) ---
+            { type: 'tf', q: 'NotebookLM is designed to ground its answers exclusively in the documents you upload.', a: true },
+            { type: 'mc', q: 'What is a core feature of NotebookLM?', options: ['Video editing', 'Creating Audio Overviews (Podcasts)', 'Sending emails', 'Managing calendars'], a: 1 },
+            { type: 'gap', q: 'NotebookLM acts as a personalized AI research [GAP].', options: ['Assistant', 'Blocker', 'Network', 'Drive'], a: 0 },
+            { type: 'drag', q: 'Drag the term: NotebookLM uses your notes as its primary...', options: ['Source', 'Obstacle', 'Output'], a: 0 },
+            { type: 'tf', q: 'NotebookLM automatically shares your uploaded documents with the public.', a: false },
+            { type: 'mc', q: 'How does NotebookLM prove where it got its information?', options: ['It guesses', 'It provides inline citations to your documents', 'It searches Google', 'It doesn\'t prove it'], a: 1 },
+            { type: 'gap', q: 'You can upload PDFs, text files, and Google [GAP] to NotebookLM.', options: ['Docs', 'Hardware', 'Maps', 'Search'], a: 0 },
+            { type: 'drag', q: 'Drag the feature: NotebookLM can generate a study...', options: ['Guide', 'Desk', 'Lamp'], a: 0 },
+            { type: 'tf', q: 'NotebookLM can analyze multiple documents at the same time.', a: true },
+            { type: 'mc', q: 'What does the "Audio Overview" feature in NotebookLM do?', options: ['Reads the text in a robotic voice', 'Translates audio to text', 'Creates an AI-hosted podcast discussion about your sources', 'Plays background music'], a: 2 },
+            { type: 'gap', q: 'NotebookLM prevents AI [GAP] by restricting answers to your uploaded sources.', options: ['Hallucinations', 'Speed', 'Learning', 'Updates'], a: 0 },
+            { type: 'drag', q: 'Drag the source type: You can import URLs from web...', options: ['Pages', 'Browsers', 'Servers'], a: 0 },
+            { type: 'tf', q: 'NotebookLM was originally announced as "Project Tailwind".', a: true },
+            { type: 'mc', q: 'Which AI model powers NotebookLM?', options: ['GPT-4', 'Claude', 'Gemini 1.5 Pro', 'Llama 3'], a: 2 },
+            { type: 'gap', q: 'When you select text in your source, NotebookLM can [GAP] it for you.', options: ['Summarize', 'Delete', 'Print', 'Corrupt'], a: 0 },
+            { type: 'drag', q: 'Drag the term: NotebookLM is essentially a note-taking app mixed with an...', options: ['LLM', 'RPG', 'IDE'], a: 0 },
+            { type: 'tf', q: 'You cannot save NotebookLM\'s responses as standalone notes.', a: false },
+            { type: 'mc', q: 'What is a "Notebook" in NotebookLM?', options: ['A physical book', 'A collection of uploaded sources and chats', 'A laptop computer', 'A code editor'], a: 1 },
+            { type: 'gap', q: 'The inline citations in NotebookLM allow you to jump directly to the original [GAP].', options: ['Quote', 'Website', 'Google', 'App'], a: 0 },
+            { type: 'drag', q: 'Drag the limit feature: A notebook can hold multiple...', options: ['Sources', 'Users', 'Keyboards'], a: 0 },
+            { type: 'tf', q: 'NotebookLM uses your private data to train Google\'s base AI models.', a: false },
+            { type: 'mc', q: 'Who is the ideal user for NotebookLM?', options: ['Gamers', 'Researchers and Students', 'Professional Athletes', 'Chefs'], a: 1 },
+            { type: 'gap', q: 'In NotebookLM, the AI becomes an expert specifically on the [GAP] you provide.', options: ['Information', 'Questions', 'Prompt', 'Computer'], a: 0 },
+            { type: 'drag', q: 'Drag the format: NotebookLM can create a FAQ or a Briefing...', options: ['Document', 'Case', 'Window'], a: 0 },
+            { type: 'tf', q: 'The voices in the Audio Overview feature sound like highly realistic human podcasters.', a: true }
+        ];
+
+        // --- Game State Variables ---
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let scoreCorrect = 0;
+        let scoreIncorrect = 0;
+        let timeLeft = 120; // 2 minutes
+        let timerInterval;
+        let gameActive = false;
+        
+        // --- DOM Elements ---
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        const questionContainer = document.getElementById('question-container');
+        const qCounter = document.getElementById('q-counter');
+        const scoreCounter = document.getElementById('score-counter');
+        const timerDisplay = document.getElementById('timer');
+        const timerContainer = document.getElementById('timer-container');
+        const cinemaScreenContainer = document.getElementById('cinema-screen-container');
+        const nextBtn = document.getElementById('next-btn');
+
+        // --- Initialization ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startGame() {
+            // Reset state
+            currentQuestions = shuffleArray([...allQuestions]);
+            currentIndex = 0;
+            scoreCorrect = 0;
+            scoreIncorrect = 0;
+            timeLeft = 120;
+            gameActive = true;
+            
+            updateScoreUI();
+            
+            welcomeScreen.classList.add('hidden-view');
+            resultsScreen.classList.add('hidden-view');
+            quizScreen.classList.remove('hidden-view');
+            
+            startTimer();
+            loadQuestion();
+        }
+
+        // --- Timer Logic ---
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerContainer.classList.remove('border-red-500', 'text-red-500');
+            timerDisplay.classList.remove('text-red-500');
+            
+            updateTimerUI();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerUI();
+                
+                if (timeLeft <= 10) {
+                    timerContainer.classList.add('border-red-500', 'shadow-[0_0_15px_rgba(239,68,68,0.5)]');
+                    timerDisplay.classList.add('text-red-500');
+                }
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function updateTimerUI() {
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            timerDisplay.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        // --- Question Rendering Logic ---
+        function loadQuestion() {
+            if (currentIndex >= currentQuestions.length || !gameActive) {
+                endGame();
+                return;
+            }
+            
+            nextBtn.classList.add('hidden-view');
+            qCounter.textContent = currentIndex + 1;
+            const q = currentQuestions[currentIndex];
+            questionContainer.innerHTML = ''; // Clear previous
+            questionContainer.className = 'w-full h-full flex flex-col justify-center items-center text-center space-y-6 fade-in';
+            cinemaScreenContainer.className = 'cinema-screen w-full aspect-video md:aspect-[21/9] rounded-xl flex flex-col justify-center items-center p-6 md:p-12 relative overflow-hidden';
+            
+            // Build UI based on type
+            const title = document.createElement('h3');
+            title.className = 'text-2xl md:text-3xl font-bold text-gray-800 drop-shadow-sm max-w-2xl';
+            
+            if (q.type === 'mc') {
+                title.textContent = q.q;
+                questionContainer.appendChild(title);
+                
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl mt-6';
+                
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn-option bg-white border-2 border-gray-200 text-gray-700 font-semibold py-4 px-6 rounded-xl hover:bg-blue-50 hover:border-blue-300 focus:outline-none shadow-sm';
+                    btn.textContent = opt;
+                    btn.onclick = () => handleAnswer(idx === q.a, btn);
+                    grid.appendChild(btn);
+                });
+                questionContainer.appendChild(grid);
+            } 
+            else if (q.type === 'tf') {
+                title.textContent = q.q;
+                questionContainer.appendChild(title);
+                
+                const flex = document.createElement('div');
+                flex.className = 'flex gap-6 mt-8';
+                
+                ['True', 'False'].forEach((opt) => {
+                    const btn = document.createElement('button');
+                    const isTrue = opt === 'True';
+                    btn.className = `btn-option border-2 font-bold text-xl py-4 px-10 rounded-xl shadow-sm focus:outline-none text-white ${isTrue ? 'bg-green-600 border-green-700 hover:bg-green-500' : 'bg-red-600 border-red-700 hover:bg-red-500'}`;
+                    btn.textContent = opt;
+                    btn.onclick = () => handleAnswer(isTrue === q.a, btn);
+                    flex.appendChild(btn);
+                });
+                questionContainer.appendChild(flex);
+            }
+            else if (q.type === 'gap') {
+                // Split question by [GAP]
+                const parts = q.q.split('[GAP]');
+                
+                const p = document.createElement('p');
+                p.className = 'text-2xl md:text-3xl font-bold text-gray-800 leading-loose max-w-3xl';
+                
+                p.appendChild(document.createTextNode(parts[0]));
+                
+                const select = document.createElement('select');
+                select.className = 'mx-2 p-2 text-xl bg-blue-50 border-b-4 border-blue-400 focus:outline-none rounded shadow-inner text-blue-800 font-bold';
+                const defaultOpt = document.createElement('option');
+                defaultOpt.textContent = '---';
+                defaultOpt.value = '-1';
+                select.appendChild(defaultOpt);
+                
+                q.options.forEach((opt, idx) => {
+                    const option = document.createElement('option');
+                    option.value = idx;
+                    option.textContent = opt;
+                    select.appendChild(option);
+                });
+                p.appendChild(select);
+                
+                if (parts[1]) p.appendChild(document.createTextNode(parts[1]));
+                
+                questionContainer.appendChild(p);
+                
+                const submitBtn = document.createElement('button');
+                submitBtn.className = 'mt-8 px-8 py-3 bg-blue-600 text-white font-bold rounded-full hover:bg-blue-500 transition shadow';
+                submitBtn.textContent = 'Submit';
+                submitBtn.onclick = () => {
+                    if (select.value === '-1') return; // Do nothing if unselected
+                    handleAnswer(parseInt(select.value) === q.a, select);
+                };
+                questionContainer.appendChild(submitBtn);
+            }
+            else if (q.type === 'drag') {
+                title.textContent = q.q;
+                questionContainer.appendChild(title);
+                
+                const interactArea = document.createElement('div');
+                interactArea.className = 'flex flex-col items-center mt-6 w-full gap-8';
+                
+                // For simplicity and mobile readiness, we implement a "Select Item, Click Target" approach styled as drag & drop
+                const dropzone = document.createElement('div');
+                dropzone.className = 'dropzone w-64 h-20 rounded-xl flex items-center justify-center text-gray-400 font-bold text-lg';
+                dropzone.textContent = 'Drop or Tap Here';
+                
+                const optionsContainer = document.createElement('div');
+                optionsContainer.className = 'flex flex-wrap justify-center gap-4 w-full';
+                
+                let selectedElement = null;
+
+                q.options.forEach((opt, idx) => {
+                    const item = document.createElement('div');
+                    item.className = 'draggable-item bg-white border-2 border-indigo-200 text-indigo-700 font-bold py-3 px-6 rounded-lg shadow-md select-none';
+                    item.textContent = opt;
+                    
+                    // Click to select logic (mobile friendly)
+                    item.onclick = () => {
+                        // Deselect others
+                        Array.from(optionsContainer.children).forEach(c => c.classList.remove('ring-4', 'ring-indigo-400', 'scale-105'));
+                        item.classList.add('ring-4', 'ring-indigo-400', 'scale-105');
+                        selectedElement = { text: opt, idx: idx, el: item };
+                        dropzone.classList.add('animate-pulse', 'border-indigo-400');
+                    };
+                    
+                    optionsContainer.appendChild(item);
+                });
+                
+                dropzone.onclick = () => {
+                    if (!selectedElement) return;
+                    dropzone.classList.remove('animate-pulse', 'border-indigo-400');
+                    dropzone.textContent = selectedElement.text;
+                    dropzone.className = 'dropzone w-64 h-20 rounded-xl flex items-center justify-center font-bold text-lg bg-indigo-50 border-2 border-indigo-400 text-indigo-800 shadow-inner';
+                    selectedElement.el.style.opacity = '0.3';
+                    selectedElement.el.onclick = null;
+                    
+                    setTimeout(() => {
+                        handleAnswer(selectedElement.idx === q.a, dropzone);
+                    }, 300);
+                };
+
+                interactArea.appendChild(dropzone);
+                interactArea.appendChild(optionsContainer);
+                questionContainer.appendChild(interactArea);
+                
+                const hint = document.createElement('p');
+                hint.className = 'text-xs text-gray-400 mt-4';
+                hint.textContent = 'Tap a word below, then tap the box to place it.';
+                questionContainer.appendChild(hint);
+            }
+        }
+
+        // --- Answer Evaluation ---
+        function handleAnswer(isCorrect, element) {
+            if (!gameActive) return;
+            
+            // Disable interactions
+            questionContainer.style.pointerEvents = 'none';
+            
+            if (isCorrect) {
+                scoreCorrect++;
+                cinemaScreenContainer.classList.add('correct-flash');
+                if(element) element.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
+            } else {
+                scoreIncorrect++;
+                cinemaScreenContainer.classList.add('incorrect-flash');
+                if(element) element.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
+            }
+            
+            updateScoreUI();
+            
+            setTimeout(() => {
+                cinemaScreenContainer.classList.remove('correct-flash', 'incorrect-flash');
+                nextQuestion(false);
+            }, 800); // Wait 0.8s before next question
+        }
+
+        function nextQuestion(skipped) {
+            if (skipped) {
+                scoreIncorrect++; // Skips count as incorrect implicitly, or we can just leave it unanswered. Let's count as incorrect for fast pace.
+                updateScoreUI();
+            }
+            currentIndex++;
+            questionContainer.style.pointerEvents = 'auto';
+            loadQuestion();
+        }
+
+        function updateScoreUI() {
+            scoreCounter.textContent = scoreCorrect;
+        }
+
+        // --- Game Over & Dashboard ---
+        function endGame() {
+            gameActive = false;
+            clearInterval(timerInterval);
+            
+            quizScreen.classList.add('hidden-view');
+            resultsScreen.classList.remove('hidden-view');
+            
+            const totalQuestions = allQuestions.length; // 50
+            const unanswered = totalQuestions - (scoreCorrect + scoreIncorrect);
+            const percentage = Math.round((scoreCorrect / totalQuestions) * 100);
+            
+            document.getElementById('stat-correct').textContent = scoreCorrect;
+            document.getElementById('stat-incorrect').textContent = scoreIncorrect;
+            document.getElementById('stat-unanswered').textContent = unanswered > 0 ? unanswered : 0;
+            
+            document.getElementById('result-percentage').textContent = `${percentage}%`;
+            
+            // Animate SVG Circle
+            // SVG dasharray max is 100
+            const circle = document.getElementById('result-circle');
+            
+            // Set color based on score
+            if (percentage >= 80) circle.style.color = '#22c55e'; // Green
+            else if (percentage >= 50) circle.style.color = '#eab308'; // Yellow
+            else circle.style.color = '#ef4444'; // Red
+            
+            setTimeout(() => {
+                circle.setAttribute('stroke-dasharray', `${percentage}, 100`);
+            }, 100);
+        }
+
+        function resetGame() {
+            // Reset dasharray for animation re-trigger later
+            document.getElementById('result-circle').setAttribute('stroke-dasharray', `0, 100`);
+            resultsScreen.classList.add('hidden-view');
+            welcomeScreen.classList.remove('hidden-view');
+        }
+
+    </script>
+</body>
+</html>
